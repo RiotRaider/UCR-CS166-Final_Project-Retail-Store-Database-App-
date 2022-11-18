@@ -115,6 +115,7 @@ public class Retail {
       int numCol = rsmd.getColumnCount ();
       int rowCount = 0;
 
+
       // iterates through the result set and output them to standard out.
       boolean outputHeader = true;
       while (rs.next()){
@@ -126,7 +127,7 @@ public class Retail {
 			outputHeader = false;
 		 }
          for (int i=1; i<=numCol; ++i)
-            System.out.print (rs.getString (i) + "\t");
+            System.out.print (rs.getString (i).trim() + "\t");
          System.out.println ();
          ++rowCount;
       }//end while
@@ -272,7 +273,7 @@ public class Retail {
             if (authorisedUser != null) {
               boolean usermenu = true;
               while(usermenu) {
-                System.out.println("MAIN MENU");
+                System.out.println("\nMAIN MENU");
                 System.out.println("---------");
                 System.out.println("1. View Stores within 30 miles");
                 System.out.println("2. View Product List");
@@ -289,7 +290,7 @@ public class Retail {
                 System.out.println(".........................");
                 System.out.println("20. Log out");
                 switch (readChoice()){
-                   case 1: viewStores(esql); break;
+                   case 1: viewStores(esql, authorisedUser); break;
                    case 2: viewProducts(esql); break;
                    case 3: placeOrder(esql); break;
                    case 4: viewRecentOrders(esql); break;
@@ -385,7 +386,7 @@ public class Retail {
          System.out.print("\tEnter password: ");
          String password = in.readLine();
 
-         String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
+         String query = String.format("SELECT userID FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
 	 if (userNum > 0)
 		return name;
@@ -398,7 +399,14 @@ public class Retail {
 
 // Rest of the functions definition go in here
 
-   public static void viewStores(Retail esql) {}
+   public static void viewStores(Retail esql, String user) {
+      try{
+         String query = String.format("SELECT S.storeID, S.name, calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude) AS distance FROM Store S, Users U WHERE U.name = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", user);
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewProducts(Retail esql) {}
    public static void placeOrder(Retail esql) {}
    public static void viewRecentOrders(Retail esql) {}
