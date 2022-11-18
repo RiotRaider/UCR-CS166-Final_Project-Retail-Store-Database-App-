@@ -387,10 +387,12 @@ public class Retail {
          String password = in.readLine();
 
          String query = String.format("SELECT userID FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
-         int userNum = esql.executeQuery(query);
-	 if (userNum > 0)
-		return name;
-         return null;
+         List<List<String>> result = esql.executeQueryAndReturnResult(query);
+	 if (result.size() > 0){
+         String user = result.get(0).get(0);
+		   return user;
+      }
+      return null;
       }catch(Exception e){
          System.err.println (e.getMessage ());
          return null;
@@ -401,7 +403,7 @@ public class Retail {
 
    public static void viewStores(Retail esql, String user) {
       try{
-         String query = String.format("SELECT S.storeID, S.name, calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude) AS distance FROM Store S, Users U WHERE U.name = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", user);
+         String query = String.format("SELECT S.storeID, S.name, calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude) AS distance FROM Store S, Users U WHERE U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", user);
          esql.executeQueryAndPrintResult(query);
       }catch(Exception e){
          System.err.println(e.getMessage());
