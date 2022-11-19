@@ -118,17 +118,26 @@ public class Retail {
 
       // iterates through the result set and output them to standard out.
       boolean outputHeader = true;
+      String row = null;
       while (rs.next()){
 		 if(outputHeader){
 			for(int i = 1; i <= numCol; i++){
-			System.out.print(rsmd.getColumnName(i) + "\t");
+            if(i==1){
+               row = String.format("%-30s",rsmd.getColumnName(i));
+            }else{
+               row += String.format("%-30s",rsmd.getColumnName(i));
+            }
 			}
-			System.out.println();
+         System.out.println(row);
 			outputHeader = false;
 		 }
          for (int i=1; i<=numCol; ++i)
-            System.out.print (rs.getString (i).trim() + "\t");
-         System.out.println ();
+            if(i==1){
+               row = String.format("%-30s",rs.getString (i).trim());
+            }else{
+               row += String.format("%-30s",rs.getString (i).trim());
+            }
+         System.out.println(row);
          ++rowCount;
       }//end while
       stmt.close ();
@@ -409,7 +418,26 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewProducts(Retail esql) {}
+   public static void viewProducts(Retail esql) {
+      try{
+         int store;
+         do {
+         System.out.print("\tEnter Store ID: ");
+         try { // read the integer, parse it and break.
+            store = Integer.parseInt(in.readLine());
+            break;
+         }catch (Exception e) {
+            System.out.println("Your input is invalid!");
+            continue;
+         }//end try
+      }while (true);
+
+      String query = String.format("SELECT P.productName as Name, P.numberOfUnits as Qty, P.pricePerUnit as Unit_Price FROM Product P WHERE P.storeID = '%d';",store);
+      esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void placeOrder(Retail esql) {}
    public static void viewRecentOrders(Retail esql) {}
    public static void updateProduct(Retail esql) {}
