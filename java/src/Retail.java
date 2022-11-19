@@ -273,7 +273,6 @@ public class Retail {
             if (authorisedUserData != null) {
               String authorisedUser = authorisedUserData.get(0);
               String authorisedUserType = authorisedUserData.get(1);
-              System.out.println(authorisedUser+"  "+authorisedUserType);
               boolean usermenu = true;
               while(usermenu) {
                 System.out.println("\nMAIN MENU");
