@@ -263,14 +263,17 @@ public class Retail {
             System.out.println("1. Create user");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
-            String authorisedUser = null;
+            List<String> authorisedUserData = null;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
-               case 2: authorisedUser = LogIn(esql); break;
+               case 2: authorisedUserData = LogIn(esql); break;
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
-            if (authorisedUser != null) {
+            if (authorisedUserData != null) {
+              String authorisedUser = authorisedUserData.get(0);
+              String authorisedUserType = authorisedUserData.get(1);
+              System.out.println(authorisedUser+"  "+authorisedUserType);
               boolean usermenu = true;
               while(usermenu) {
                 System.out.println("\nMAIN MENU");
@@ -379,17 +382,17 @@ public class Retail {
     * Check log in credentials for an existing user
     * @return User login or null is the user does not exist
     **/
-   public static String LogIn(Retail esql){
+   public static List<String> LogIn(Retail esql){
       try{
          System.out.print("\tEnter name: ");
          String name = in.readLine();
          System.out.print("\tEnter password: ");
          String password = in.readLine();
 
-         String query = String.format("SELECT userID FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
+         String query = String.format("SELECT userID, type FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          List<List<String>> result = esql.executeQueryAndReturnResult(query);
 	 if (result.size() > 0){
-         String user = result.get(0).get(0);
+         List<String> user = result.get(0);
 		   return user;
       }
       return null;
