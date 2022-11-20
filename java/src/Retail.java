@@ -478,8 +478,12 @@ public class Retail {
             return;
          }
          //Insert into Orders table
-         String query = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, now())", user, store, productName, units);
-         esql.executeUpdate(query);
+         String q3 = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, now())", user, store, productName, units);
+         esql.executeUpdate(q3);
+         //Update Product table
+         String q4 = String.format("UPDATE Product SET numberOfUnits = numberOfUnits - %d WHERE storeID = '%d' AND productName = '%s'", units, store, productName);
+         esql.executeUpdate(q4);
+
 
       }
       catch(Exception e){
