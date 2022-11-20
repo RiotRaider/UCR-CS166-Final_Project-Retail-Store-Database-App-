@@ -285,20 +285,39 @@ public class Retail {
               boolean usermenu = true;
 
               while(usermenu) {
-               if(authorisedUserType.equals("manager")){
+               if(authorisedUserType.equals("admin")){
+                  adminMenu();
+                  switch (readChoice()){
+                     case 1: viewStores(esql, authorisedUser); break;
+                     case 2: viewProducts(esql); break;
+                     case 3: placeOrder(esql); break;
+                     case 4: viewRecentOrders(esql); break;
+                     case 5: updateProduct(esql); break;
+                     case 6: viewRecentUpdates(esql); break;
+                     case 7: viewPopularProducts(esql); break;
+                     case 8: viewPopularCustomers(esql); break;
+                     case 9: placeProductSupplyRequests(esql); break;
+                     case 10:adminViewUsers(esql);break;
+                     case 11:adminViewProducts(esql);break;
+                     case 12:adminUpdateUser(esql);break;
+                     case 13:adminUpdateProduct(esql);break;
+                     case 20: usermenu = false; break;
+                     default : System.out.println("Unrecognized choice!"); break;
+                    }
+               }else if(authorisedUserType.equals("manager")){
                   manageMenu();
-               switch (readChoice()){
-                  case 1: viewStores(esql, authorisedUser); break;
-                  case 2: viewProducts(esql); break;
-                  case 3: placeOrder(esql); break;
-                  case 4: viewRecentOrders(esql); break;
-                  case 5: updateProduct(esql); break;
-                  case 6: viewRecentUpdates(esql); break;
-                  case 7: viewPopularProducts(esql); break;
-                  case 8: viewPopularCustomers(esql); break;
-                  case 9: placeProductSupplyRequests(esql); break;
-                  case 20: usermenu = false; break;
-                  default : System.out.println("Unrecognized choice!"); break;
+                  switch (readChoice()){
+                     case 1: viewStores(esql, authorisedUser); break;
+                     case 2: viewProducts(esql); break;
+                     case 3: placeOrder(esql); break;
+                     case 4: viewRecentOrders(esql); break;
+                     case 5: updateProduct(esql); break;
+                     case 6: viewRecentUpdates(esql); break;
+                     case 7: viewPopularProducts(esql); break;
+                     case 8: viewPopularCustomers(esql); break;
+                     case 9: placeProductSupplyRequests(esql); break;
+                     case 20: usermenu = false; break;
+                     default : System.out.println("Unrecognized choice!"); break;
                     }
                }else{
                   custMenu();
@@ -309,12 +328,11 @@ public class Retail {
                   case 4: viewRecentOrders(esql); break;
                   case 20: usermenu = false; break;
                   default : System.out.println("Unrecognized choice!"); break;
+                  }
                }
             }
          }
-            }
-         }
-         //end while
+         }//end while
       }catch(Exception e) {
          System.err.println (e.getMessage ());
       }finally{
@@ -384,7 +402,7 @@ public class Retail {
    }//end CreateUser
 
    public static void custMenu(){
-      System.out.println("\nMAIN MENU");
+      System.out.println("\n\nMAIN MENU");
       System.out.println("---------");
       System.out.println("1. View Stores within 30 miles");
       System.out.println("2. View Product List");
@@ -395,17 +413,39 @@ public class Retail {
    }
    
    public static void manageMenu(){
-      System.out.println("\nMAIN MENU");
+      System.out.println("\n\nMAIN MENU");
       System.out.println("---------");
       System.out.println("1. View Stores within 30 miles");
       System.out.println("2. View Product List");
       System.out.println("3. Place a Order");
       System.out.println("4. View 5 recent orders");
+      System.out.println("\n***MANAGER OPTIONS***");
       System.out.println("5. Update Product");
       System.out.println("6. View 5 recent Product Updates Info");
       System.out.println("7. View 5 Popular Items");
       System.out.println("8. View 5 Popular Customers");
       System.out.println("9. Place Product Supply Request to Warehouse");
+      System.out.println(".........................");
+      System.out.println("20. Log out");
+   }
+   public static void adminMenu(){
+      System.out.println("\n\nMAIN MENU");
+      System.out.println("---------");
+      System.out.println("1. View Stores within 30 miles");
+      System.out.println("2. View Product List");
+      System.out.println("3. Place a Order");
+      System.out.println("4. View 5 recent orders");
+      System.out.println("\n***MANAGER OPTIONS***");
+      System.out.println("5. Update Product");
+      System.out.println("6. View 5 recent Product Updates Info");
+      System.out.println("7. View 5 Popular Items");
+      System.out.println("8. View 5 Popular Customers");
+      System.out.println("9. Place Product Supply Request to Warehouse");
+      System.out.println("\n***ADMIN OPTIONS***");
+      System.out.println("10. View all Users");
+      System.out.println("11. View all Products");
+      System.out.println("12. Update a User");
+      System.out.println("13. Update a Product");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -473,5 +513,10 @@ public class Retail {
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
 
+   public static void adminViewUsers(Retail esql) {}
+   public static void adminViewProducts(Retail esql) {}
+   public static void adminUpdateUser(Retail esql) {}
+   public static void adminUpdateProduct(Retail esql) {}
+   
 }//end Retail
 
