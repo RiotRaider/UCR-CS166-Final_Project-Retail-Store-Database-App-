@@ -477,6 +477,9 @@ public class Retail {
             System.out.println("The product does not exists or there is not enough stock!");
             return;
          }
+         //Insert into Orders table
+         String query = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, now())", user, store, productName, units);
+         esql.executeUpdate(query);
 
       }
       catch(Exception e){
