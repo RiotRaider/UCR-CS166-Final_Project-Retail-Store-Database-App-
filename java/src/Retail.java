@@ -468,14 +468,14 @@ public class Retail {
             }//end try
          }while (true);
          String q1 = String.format("SELECT S.storeID FROM Store S, Users U WHERE S.storeID = '%d' AND U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", store, user);
-         if(executeQuery(q1)==0){
+         if(esql.executeQuery(q1)==0){
             System.out.println("The store does not exist or is too far!");
-            return null;
+            return;
          }
          String q2 = String.format("SELECT storeID FROM Product WHERE storeID = '%d' AND productName = '%s' AND numberOfUnits>=%d;", store, productName, units);
-         if(executeQuery(q2)==0){
+         if(esql.executeQuery(q2)==0){
             System.out.println("The product does not exists or there is not enough stock!");
-            return null;
+            return;
          }
 
       }
