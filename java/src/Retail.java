@@ -275,50 +275,46 @@ public class Retail {
             List<String> authorisedUserData = null;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
-               case 2: authorisedUserData = LogIn(esql); break;
+               case 2: authorisedUserData = LogIn(esql);break;
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
             if (authorisedUserData != null) {
-              String authorisedUser = authorisedUserData.get(0);
-              String authorisedUserType = authorisedUserData.get(1);
+              String authorisedUser = authorisedUserData.get(0).trim();
+              String authorisedUserType = authorisedUserData.get(1).trim();
               boolean usermenu = true;
+
               while(usermenu) {
-                System.out.println("\nMAIN MENU");
-                System.out.println("---------");
-                System.out.println("1. View Stores within 30 miles");
-                System.out.println("2. View Product List");
-                System.out.println("3. Place a Order");
-                System.out.println("4. View 5 recent orders");
-                //the following functionalities basically used by manager
-                if(authorisedUserType == "manager"){
-                  System.out.println("5. Update Product");
-                  System.out.println("6. View 5 recent Product Updates Info");
-                  System.out.println("7. View 5 Popular Items");
-                  System.out.println("8. View 5 Popular Customers");
-                  System.out.println("9. Place Product Supply Request to Warehouse");
-                }
-                  
-                System.out.println(".........................");
-                System.out.println("20. Log out");
-                switch (readChoice()){
-                   case 1: viewStores(esql, authorisedUser); break;
-                   case 2: viewProducts(esql); break;
-                   case 3: placeOrder(esql); break;
-                   case 4: viewRecentOrders(esql); break;
-                   if(authorisedUserType=="manager"){
-                   case 5: updateProduct(esql); break;
-                   case 6: viewRecentUpdates(esql); break;
-                   case 7: viewPopularProducts(esql); break;
-                   case 8: viewPopularCustomers(esql); break;
-                   case 9: placeProductSupplyRequests(esql); break;
-                   }
-                   case 20: usermenu = false; break;
-                   default : System.out.println("Unrecognized choice!"); break;
-                }
-              }
+               if(authorisedUserType.equals("manager")){
+                  manageMenu();
+               switch (readChoice()){
+                  case 1: viewStores(esql, authorisedUser); break;
+                  case 2: viewProducts(esql); break;
+                  case 3: placeOrder(esql); break;
+                  case 4: viewRecentOrders(esql); break;
+                  case 5: updateProduct(esql); break;
+                  case 6: viewRecentUpdates(esql); break;
+                  case 7: viewPopularProducts(esql); break;
+                  case 8: viewPopularCustomers(esql); break;
+                  case 9: placeProductSupplyRequests(esql); break;
+                  case 20: usermenu = false; break;
+                  default : System.out.println("Unrecognized choice!"); break;
+                    }
+               }else{
+                  custMenu();
+               switch (readChoice()){
+                  case 1: viewStores(esql, authorisedUser); break;
+                  case 2: viewProducts(esql); break;
+                  case 3: placeOrder(esql); break;
+                  case 4: viewRecentOrders(esql); break;
+                  case 20: usermenu = false; break;
+                  default : System.out.println("Unrecognized choice!"); break;
+               }
             }
-         }//end while
+         }
+            }
+         }
+         //end while
       }catch(Exception e) {
          System.err.println (e.getMessage ());
       }finally{
@@ -386,6 +382,33 @@ public class Retail {
          System.err.println (e.getMessage ());
       }
    }//end CreateUser
+
+   public static void custMenu(){
+      System.out.println("\nMAIN MENU");
+      System.out.println("---------");
+      System.out.println("1. View Stores within 30 miles");
+      System.out.println("2. View Product List");
+      System.out.println("3. Place a Order");
+      System.out.println("4. View 5 recent orders");
+      System.out.println(".........................");
+      System.out.println("20. Log out");
+   }
+   
+   public static void manageMenu(){
+      System.out.println("\nMAIN MENU");
+      System.out.println("---------");
+      System.out.println("1. View Stores within 30 miles");
+      System.out.println("2. View Product List");
+      System.out.println("3. Place a Order");
+      System.out.println("4. View 5 recent orders");
+      System.out.println("5. Update Product");
+      System.out.println("6. View 5 recent Product Updates Info");
+      System.out.println("7. View 5 Popular Items");
+      System.out.println("8. View 5 Popular Customers");
+      System.out.println("9. Place Product Supply Request to Warehouse");
+      System.out.println(".........................");
+      System.out.println("20. Log out");
+   }
 
 
    /*
