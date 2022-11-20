@@ -303,7 +303,7 @@ public class Retail {
                 switch (readChoice()){
                    case 1: viewStores(esql, authorisedUser); break;
                    case 2: viewProducts(esql); break;
-                   case 3: placeOrder(esql); break;
+                   case 3: placeOrder(esql, authorisedUser); break;
                    case 4: viewRecentOrders(esql); break;
                    case 5: updateProduct(esql); break;
                    case 6: viewRecentUpdates(esql); break;
@@ -440,7 +440,49 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void placeOrder(Retail esql) {}
+   public static void placeOrder(Retail esql, String user) {
+      try{
+         int store;
+         String productName;
+         int units;
+         do { // StoreID input
+            System.out.print("\tEnter Store ID: ");
+            try { // read the integer, parse it and break.
+               store = Integer.parseInt(in.readLine());
+               break;
+            }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+            }//end try
+         }while (true);
+         System.out.print("\tEnter Product Name: ");// Product name input
+         productName = in.readLine();
+         do { // Number of units input
+            System.out.print("\tEnter Number of units: ");
+            try { // read the integer, parse it and break.
+               units = Integer.parseInt(in.readLine());
+               break;
+            }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+            }//end try
+         }while (true);
+         String q1 = String.format("SELECT S.storeID FROM Store S, Users U WHERE S.storeID = '%d' AND U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", store, user);
+         if(executeQuery(q1)==0){
+            System.out.println("The store does not exist or is too far!");
+            return null;
+         }
+         String q2 = String.format("SELECT storeID FROM Product WHERE storeID = '%d' AND productName = '%s' AND numberOfUnits>=%d;", store, productName, units);
+         if(executeQuery(q2)==0){
+            System.out.println("The product does not exists or there is not enough stock!");
+            return null;
+         }
+
+      }
+      catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewRecentOrders(Retail esql) {}
    public static void updateProduct(Retail esql) {}
    public static void viewRecentUpdates(Retail esql) {}
