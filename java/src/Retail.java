@@ -300,7 +300,7 @@ public class Retail {
                      case 10:adminViewUsers(esql);break;
                      case 11:adminViewProducts(esql);break;
                      case 12:System.out.println("Update User...");adminUpdateUser(esql);break;
-                     case 13:System.out.println("Update Product...");adminUpdateProduct(esql);break;
+                     case 13:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -636,7 +636,7 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void adminUpdateProduct(Retail esql) {
+   public static void adminUpdateProduct(Retail esql,String user) {
       try{
          int valid = 0;
          String[] values = {null,null,null,null};
@@ -680,7 +680,8 @@ public class Retail {
          esql.executeUpdate(update);
          System.out.println("\nUpdated Product Info:");
          esql.executeQueryAndPrintResult(query);
-
+         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', now());", user, values[0], values[1]);
+         esql.executeUpdate(query);
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
