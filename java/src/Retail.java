@@ -299,8 +299,8 @@ public class Retail {
                      case 9: placeProductSupplyRequests(esql); break;
                      case 10:adminViewUsers(esql);break;
                      case 11:adminViewProducts(esql);break;
-                     case 12:adminUpdateUser(esql);break;
-                     case 13:adminUpdateProduct(esql);break;
+                     case 12:System.out.println("Update User...");adminUpdateUser(esql);break;
+                     case 13:System.out.println("Update Product...");adminUpdateProduct(esql);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -578,7 +578,64 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void adminUpdateUser(Retail esql) {}
+   public static void adminUpdateUser(Retail esql) {
+      try{
+         int user = 0;
+         String[] values = {null,null,null,null,null};
+         List<List<String>> result = null;
+         List<String> validUser=null;
+         System.out.print("Enter User ID to update: ");
+         user = Integer.parseInt(in.readLine());
+         String query = String.format("Select * FROM Users WHERE userID = '%d';", user);
+         result = esql.executeQueryAndReturnResult(query);
+         validUser = result.get(0);
+         System.out.format("User ID : %s\n",validUser.get(0));
+         System.out.format("Current Name: %s\nNew User Name (Press Enter to keep current): ", validUser.get(1));
+         values[0] = in.readLine();
+         if(values[0].equals("")){
+            values[0] = validUser.get(1);
+         }
+         System.out.format("Current Password: %s\nNew Password (Press Enter to keep current): ", validUser.get(2));
+         values[1] = in.readLine();
+         if(values[1].equals("")){
+            values[1] = validUser.get(2);
+         }
+         System.out.format("Current Latitude: %s\nNew Latitude (Press Enter to keep current): ", validUser.get(3));
+         values[2] = in.readLine();
+         if(values[2].equals("")){
+            values[2] = validUser.get(3);
+         }
+         System.out.format("Current Longitude: %s\nNew Longitude (Press Enter to keep current): ", validUser.get(4));
+         values[3] = in.readLine();
+         if(values[3].equals("")){
+            values[3] = validUser.get(4);
+         }
+         System.out.format("Current Account Type: %s\n", validUser.get(5));
+         System.out.println("Select New Type:");
+         System.out.println("1:Keep Current Value");
+         System.out.println("2:Set as CUSTOMER");
+         System.out.println("3:Set as MANAGER");
+         System.out.println("4:Set as ADMIN");
+         while(values[4]==null){
+            switch(readChoice()){
+               case 1:values[4]=validUser.get(5).trim();break;
+               case 2:values[4] = "customer";break;
+               case 3:values[4] = "manager";break;
+               case 4:values[4] = "admin";break;
+               default:System.out.println("Unrecognized choice!"); break;
+            }
+         }
+         System.out.println("\nOriginal User Info:");
+         esql.executeQueryAndPrintResult(query);
+         String update = String.format("UPDATE Users SET name = '%s', password = %s , latitude = %s , longitude = %s , type = '%s' WHERE userID = %d;", values[0],values[1],values[2],values[3],values[4],user);
+         esql.executeUpdate(update);
+         System.out.println("\nUpdated User Info:");
+         esql.executeQueryAndPrintResult(query);
+
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void adminUpdateProduct(Retail esql) {}
    
 }//end Retail
