@@ -291,7 +291,7 @@ public class Retail {
                      case 1: viewStores(esql, authorisedUser); break;
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
-                     case 4: viewRecentOrders(esql); break;
+                     case 4: viewRecentOrders(esql, authorisedUser); break;
                      case 5: updateProduct(esql); break;
                      case 6: viewRecentUpdates(esql); break;
                      case 7: viewPopularProducts(esql); break;
@@ -310,7 +310,7 @@ public class Retail {
                      case 1: viewStores(esql, authorisedUser); break;
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
-                     case 4: viewRecentOrders(esql); break;
+                     case 4: viewRecentOrders(esql, authorisedUser); break;
                      case 5: updateProduct(esql); break;
                      case 6: viewRecentUpdates(esql); break;
                      case 7: viewPopularProducts(esql); break;
@@ -325,7 +325,7 @@ public class Retail {
                   case 1: viewStores(esql, authorisedUser); break;
                   case 2: viewProducts(esql); break;
                   case 3: placeOrder(esql, authorisedUser); break;
-                  case 4: viewRecentOrders(esql); break;
+                  case 4: viewRecentOrders(esql,authorisedUser); break;
                   case 20: usermenu = false; break;
                   default : System.out.println("Unrecognized choice!"); break;
                   }
@@ -555,7 +555,14 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewRecentOrders(Retail esql) {}
+   public static void viewRecentOrders(Retail esql, String user) {
+      try{
+         String query = String.format("SELECT S.storeID, S.name, O.productName, O.unitsOrdered, O.orderTime FROM Store S, Orders O WHERE '%s' = O.customerID AND O.storeID = S.storeID ORDER BY O.orderTime desc LIMIT 5;", user);
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void updateProduct(Retail esql) {}
    public static void viewRecentUpdates(Retail esql) {}
    public static void viewPopularProducts(Retail esql) {}
