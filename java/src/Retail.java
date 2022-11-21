@@ -292,15 +292,14 @@ public class Retail {
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
-                     case 5: updateProduct(esql); break;
-                     case 6: viewRecentUpdates(esql); break;
-                     case 7: viewPopularProducts(esql); break;
-                     case 8: viewPopularCustomers(esql); break;
-                     case 9: placeProductSupplyRequests(esql); break;
-                     case 10:adminViewUsers(esql);break;
-                     case 11:adminViewProducts(esql);break;
-                     case 12:System.out.println("Update User...");adminUpdateUser(esql);break;
-                     case 13:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
+                     case 5: viewRecentUpdates(esql); break;
+                     case 6: viewPopularProducts(esql); break;
+                     case 7: viewPopularCustomers(esql); break;
+                     case 8: placeProductSupplyRequests(esql); break;
+                     case 9:adminViewUsers(esql);break;
+                     case 10:adminViewProducts(esql);break;
+                     case 11:System.out.println("Update User...");adminUpdateUser(esql);break;
+                     case 12:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -311,7 +310,7 @@ public class Retail {
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
-                     case 5: updateProduct(esql); break;
+                     case 5: updateProduct(esql, authorisedUser); break;
                      case 6: viewRecentUpdates(esql); break;
                      case 7: viewPopularProducts(esql); break;
                      case 8: viewPopularCustomers(esql); break;
@@ -563,7 +562,7 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void updateProduct(Retail esql) {}
+   public static void updateProduct(Retail esql, String user) {}
    public static void viewRecentUpdates(Retail esql) {}
    public static void viewPopularProducts(Retail esql) {}
    public static void viewPopularCustomers(Retail esql) {}
