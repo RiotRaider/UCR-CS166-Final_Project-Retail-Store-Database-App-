@@ -636,7 +636,55 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void adminUpdateProduct(Retail esql) {}
+   public static void adminUpdateProduct(Retail esql) {
+      try{
+         int valid = 0;
+         String[] values = {null,null,null,null};
+         List<String> validProduct=null;
+         String query = null;
+         do{
+         System.out.print("Enter Product Name: ");
+         values[1] = in.readLine().trim();
+         query = String.format("Select * FROM Product WHERE productName = '%s';", values[1]);
+         valid = esql.executeQuery(query);
+         if(valid==0)
+            System.out.format("Product '%s' does not exist! Please select valid product", values[1]);
+         }while(valid<=0);
+         valid = 0;
+         do{
+         System.out.print("Enter Store ID: ");
+         values[0] = in.readLine();
+         query = String.format("Select * FROM Product WHERE storeID = %s AND productName = '%s' ;", values[0],values[1]);
+         valid = esql.executeQuery(query);
+         if(valid==0)
+            System.out.format("Either Store '%s' does not exist or does not stock Product '%s'! Please select different store", values[0],values[1]);
+         }while(valid<=0);
+
+         validProduct=esql.executeQueryAndReturnResult(query).get(0);
+
+         System.out.format("Current Product : %s at Store %s\n",validProduct.get(1).trim(),validProduct.get(0).trim());
+         System.out.format("Current Quantity: %s\nNew Quantity (Press Enter to keep current): ", validProduct.get(2));
+         values[2] = in.readLine();
+         if(values[2].equals("")){
+            values[2] = validProduct.get(2);
+         }
+         System.out.format("Current Unit Price: %s\nNew Unit Price (Press Enter to keep current): ", validProduct.get(3));
+         values[3] = in.readLine();
+         if(values[3].equals("")){
+            values[3] = validProduct.get(3);
+         }
+         
+         System.out.println("\nOriginal Product Info:");
+         esql.executeQueryAndPrintResult(query);
+         String update = String.format("UPDATE Product SET numberOfUnits = %s , pricePerUnit = %s WHERE storeID = %s AND productName = '%s';", values[2],values[3],values[0],values[1]);
+         esql.executeUpdate(update);
+         System.out.println("\nUpdated Product Info:");
+         esql.executeQueryAndPrintResult(query);
+
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    
 }//end Retail
 
