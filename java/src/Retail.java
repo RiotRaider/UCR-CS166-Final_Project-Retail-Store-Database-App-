@@ -435,16 +435,15 @@ public class Retail {
       System.out.println("3. Place a Order");
       System.out.println("4. View 5 recent orders");
       System.out.println("\n***MANAGER OPTIONS***");
-      System.out.println("5. Update Product");
-      System.out.println("6. View 5 recent Product Updates Info");
-      System.out.println("7. View 5 Popular Items");
-      System.out.println("8. View 5 Popular Customers");
-      System.out.println("9. Place Product Supply Request to Warehouse");
+      System.out.println("5. View 5 recent Product Updates Info");
+      System.out.println("6. View 5 Popular Items");
+      System.out.println("7. View 5 Popular Customers");
+      System.out.println("8. Place Product Supply Request to Warehouse");
       System.out.println("\n***ADMIN OPTIONS***");
-      System.out.println("10. View all Users");
-      System.out.println("11. View all Products");
-      System.out.println("12. Update a User");
-      System.out.println("13. Update a Product");
+      System.out.println("9. View all Users");
+      System.out.println("10. View all Products");
+      System.out.println("11. Update a User");
+      System.out.println("12. Update a Product");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
