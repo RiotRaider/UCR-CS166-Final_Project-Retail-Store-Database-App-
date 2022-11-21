@@ -123,9 +123,9 @@ public class Retail {
 		 if(outputHeader){
 			for(int i = 1; i <= numCol; i++){
             if(i==1){
-               row = String.format("%-30s",rsmd.getColumnName(i));
+               row = String.format("%-25s",rsmd.getColumnName(i));
             }else{
-               row += String.format("%-30s",rsmd.getColumnName(i));
+               row += String.format("%-25s",rsmd.getColumnName(i));
             }
 			}
          System.out.println(row);
@@ -133,9 +133,9 @@ public class Retail {
 		 }
          for (int i=1; i<=numCol; ++i)
             if(i==1){
-               row = String.format("%-30s",rs.getString (i).trim());
+               row = String.format("%-25s",rs.getString (i).trim());
             }else{
-               row += String.format("%-30s",rs.getString (i).trim());
+               row += String.format("%-25s",rs.getString (i).trim());
             }
          System.out.println(row);
          ++rowCount;
@@ -562,8 +562,22 @@ public class Retail {
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
 
-   public static void adminViewUsers(Retail esql) {}
-   public static void adminViewProducts(Retail esql) {}
+   public static void adminViewUsers(Retail esql) {
+       try{
+         String query = String.format("SELECT * FROM Users ORDER BY type,name;");
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void adminViewProducts(Retail esql) {
+      try{
+         String query = String.format("SELECT * FROM Product ORDER BY storeID,productName;");
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void adminUpdateUser(Retail esql) {}
    public static void adminUpdateProduct(Retail esql) {}
    
