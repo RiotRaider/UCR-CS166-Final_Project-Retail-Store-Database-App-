@@ -123,9 +123,9 @@ public class Retail {
 		 if(outputHeader){
 			for(int i = 1; i <= numCol; i++){
             if(i==1){
-               row = String.format("%-30s",rsmd.getColumnName(i));
+               row = String.format("%-25s",rsmd.getColumnName(i));
             }else{
-               row += String.format("%-30s",rsmd.getColumnName(i));
+               row += String.format("%-25s",rsmd.getColumnName(i));
             }
 			}
          System.out.println(row);
@@ -133,9 +133,9 @@ public class Retail {
 		 }
          for (int i=1; i<=numCol; ++i)
             if(i==1){
-               row = String.format("%-30s",rs.getString (i).trim());
+               row = String.format("%-25s",rs.getString (i).trim());
             }else{
-               row += String.format("%-30s",rs.getString (i).trim());
+               row += String.format("%-25s",rs.getString (i).trim());
             }
          System.out.println(row);
          ++rowCount;
@@ -299,8 +299,8 @@ public class Retail {
                      case 9: placeProductSupplyRequests(esql); break;
                      case 10:adminViewUsers(esql);break;
                      case 11:adminViewProducts(esql);break;
-                     case 12:adminUpdateUser(esql);break;
-                     case 13:adminUpdateProduct(esql);break;
+                     case 12:System.out.println("Update User...");adminUpdateUser(esql);break;
+                     case 13:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -569,10 +569,130 @@ public class Retail {
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
 
-   public static void adminViewUsers(Retail esql) {}
-   public static void adminViewProducts(Retail esql) {}
-   public static void adminUpdateUser(Retail esql) {}
-   public static void adminUpdateProduct(Retail esql) {}
+   public static void adminViewUsers(Retail esql) {
+       try{
+         String query = String.format("SELECT * FROM Users ORDER BY type,name;");
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void adminViewProducts(Retail esql) {
+      try{
+         String query = String.format("SELECT * FROM Product ORDER BY storeID,productName;");
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void adminUpdateUser(Retail esql) {
+      try{
+         int user = 0;
+         String[] values = {null,null,null,null,null};
+         List<List<String>> result = null;
+         List<String> validUser=null;
+         System.out.print("Enter User ID to update: ");
+         user = Integer.parseInt(in.readLine());
+         String query = String.format("Select * FROM Users WHERE userID = '%d';", user);
+         result = esql.executeQueryAndReturnResult(query);
+         validUser = result.get(0);
+         System.out.format("User ID : %s\n",validUser.get(0));
+         System.out.format("Current Name: %s\nNew User Name (Press Enter to keep current): ", validUser.get(1));
+         values[0] = in.readLine();
+         if(values[0].equals("")){
+            values[0] = validUser.get(1);
+         }
+         System.out.format("Current Password: %s\nNew Password (Press Enter to keep current): ", validUser.get(2));
+         values[1] = in.readLine();
+         if(values[1].equals("")){
+            values[1] = validUser.get(2);
+         }
+         System.out.format("Current Latitude: %s\nNew Latitude (Press Enter to keep current): ", validUser.get(3));
+         values[2] = in.readLine();
+         if(values[2].equals("")){
+            values[2] = validUser.get(3);
+         }
+         System.out.format("Current Longitude: %s\nNew Longitude (Press Enter to keep current): ", validUser.get(4));
+         values[3] = in.readLine();
+         if(values[3].equals("")){
+            values[3] = validUser.get(4);
+         }
+         System.out.format("Current Account Type: %s\n", validUser.get(5));
+         System.out.println("Select New Type:");
+         System.out.println("1:Keep Current Value");
+         System.out.println("2:Set as CUSTOMER");
+         System.out.println("3:Set as MANAGER");
+         System.out.println("4:Set as ADMIN");
+         while(values[4]==null){
+            switch(readChoice()){
+               case 1:values[4]=validUser.get(5).trim();break;
+               case 2:values[4] = "customer";break;
+               case 3:values[4] = "manager";break;
+               case 4:values[4] = "admin";break;
+               default:System.out.println("Unrecognized choice!"); break;
+            }
+         }
+         System.out.println("\nOriginal User Info:");
+         esql.executeQueryAndPrintResult(query);
+         String update = String.format("UPDATE Users SET name = '%s', password = %s , latitude = %s , longitude = %s , type = '%s' WHERE userID = %d;", values[0],values[1],values[2],values[3],values[4],user);
+         esql.executeUpdate(update);
+         System.out.println("\nUpdated User Info:");
+         esql.executeQueryAndPrintResult(query);
+
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void adminUpdateProduct(Retail esql,String user) {
+      try{
+         int valid = 0;
+         String[] values = {null,null,null,null};
+         List<String> validProduct=null;
+         String query = null;
+         do{
+         System.out.print("Enter Product Name: ");
+         values[1] = in.readLine().trim();
+         query = String.format("Select * FROM Product WHERE productName = '%s';", values[1]);
+         valid = esql.executeQuery(query);
+         if(valid==0)
+            System.out.format("Product '%s' does not exist! Please select valid product", values[1]);
+         }while(valid<=0);
+         valid = 0;
+         do{
+         System.out.print("Enter Store ID: ");
+         values[0] = in.readLine();
+         query = String.format("Select * FROM Product WHERE storeID = %s AND productName = '%s' ;", values[0],values[1]);
+         valid = esql.executeQuery(query);
+         if(valid==0)
+            System.out.format("Either Store '%s' does not exist or does not stock Product '%s'! Please select different store", values[0],values[1]);
+         }while(valid<=0);
+
+         validProduct=esql.executeQueryAndReturnResult(query).get(0);
+
+         System.out.format("Current Product : %s at Store %s\n",validProduct.get(1).trim(),validProduct.get(0).trim());
+         System.out.format("Current Quantity: %s\nNew Quantity (Press Enter to keep current): ", validProduct.get(2));
+         values[2] = in.readLine();
+         if(values[2].equals("")){
+            values[2] = validProduct.get(2);
+         }
+         System.out.format("Current Unit Price: %s\nNew Unit Price (Press Enter to keep current): ", validProduct.get(3));
+         values[3] = in.readLine();
+         if(values[3].equals("")){
+            values[3] = validProduct.get(3);
+         }
+         
+         System.out.println("\nOriginal Product Info:");
+         esql.executeQueryAndPrintResult(query);
+         String update = String.format("UPDATE Product SET numberOfUnits = %s , pricePerUnit = %s WHERE storeID = %s AND productName = '%s';", values[2],values[3],values[0],values[1]);
+         esql.executeUpdate(update);
+         System.out.println("\nUpdated Product Info:");
+         esql.executeQueryAndPrintResult(query);
+         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', now());", user, values[0], values[1]);
+         esql.executeUpdate(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    
 }//end Retail
 
