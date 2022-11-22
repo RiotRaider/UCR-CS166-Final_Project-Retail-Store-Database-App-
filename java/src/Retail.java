@@ -292,7 +292,7 @@ public class Retail {
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
-                     case 5: viewRecentUpdates(esql); break;
+                     case 5: viewRecentUpdates(esql, authorisedUser); break;
                      case 6: viewPopularProducts(esql); break;
                      case 7: viewPopularCustomers(esql); break;
                      case 8: placeProductSupplyRequests(esql); break;
@@ -311,7 +311,7 @@ public class Retail {
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
                      case 5: updateProduct(esql, authorisedUser); break;
-                     case 6: viewRecentUpdates(esql); break;
+                     case 6: viewRecentUpdates(esql, authorisedUser); break;
                      case 7: viewPopularProducts(esql); break;
                      case 8: viewPopularCustomers(esql); break;
                      case 9: placeProductSupplyRequests(esql); break;
@@ -611,7 +611,16 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewRecentUpdates(Retail esql) {}
+   public static void viewRecentUpdates(Retail esql, String user) {
+      try{
+         System.out.println("Displaying Recent Updates...");
+         String query = String.format("SELECT * FROM ProductUpdates U WHERE U.updatenumber IN (SELECT U1.updatenumber FROM Store S, ProductUpdates U1 WHERE S.managerID = %s AND U1.storeID = S.storeID AND S.storeID = U.storeID ORDER BY U1.updatedon DESC LIMIT 5) ORDER BY U.storeID,U.updatenumber DESC;",user);
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+      
+   }
    public static void viewPopularProducts(Retail esql) {}
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
