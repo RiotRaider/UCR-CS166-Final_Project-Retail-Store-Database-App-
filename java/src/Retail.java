@@ -292,15 +292,14 @@ public class Retail {
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
-                     case 5: updateProduct(esql); break;
-                     case 6: viewRecentUpdates(esql); break;
-                     case 7: viewPopularProducts(esql); break;
-                     case 8: viewPopularCustomers(esql); break;
-                     case 9: placeProductSupplyRequests(esql); break;
-                     case 10:adminViewUsers(esql);break;
-                     case 11:adminViewProducts(esql);break;
-                     case 12:System.out.println("Update User...");adminUpdateUser(esql);break;
-                     case 13:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
+                     case 5: viewRecentUpdates(esql, authorisedUser); break;
+                     case 6: viewPopularProducts(esql); break;
+                     case 7: viewPopularCustomers(esql); break;
+                     case 8: placeProductSupplyRequests(esql); break;
+                     case 9:adminViewUsers(esql);break;
+                     case 10:adminViewProducts(esql);break;
+                     case 11:System.out.println("Update User...");adminUpdateUser(esql);break;
+                     case 12:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -311,8 +310,8 @@ public class Retail {
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
-                     case 5: updateProduct(esql); break;
-                     case 6: viewRecentUpdates(esql); break;
+                     case 5: updateProduct(esql, authorisedUser); break;
+                     case 6: viewRecentUpdates(esql, authorisedUser); break;
                      case 7: viewPopularProducts(esql); break;
                      case 8: viewPopularCustomers(esql); break;
                      case 9: placeProductSupplyRequests(esql); break;
@@ -436,16 +435,15 @@ public class Retail {
       System.out.println("3. Place a Order");
       System.out.println("4. View 5 recent orders");
       System.out.println("\n***MANAGER OPTIONS***");
-      System.out.println("5. Update Product");
-      System.out.println("6. View 5 recent Product Updates Info");
-      System.out.println("7. View 5 Popular Items");
-      System.out.println("8. View 5 Popular Customers");
-      System.out.println("9. Place Product Supply Request to Warehouse");
+      System.out.println("5. View 5 recent Product Updates Info");
+      System.out.println("6. View 5 Popular Items");
+      System.out.println("7. View 5 Popular Customers");
+      System.out.println("8. Place Product Supply Request to Warehouse");
       System.out.println("\n***ADMIN OPTIONS***");
-      System.out.println("10. View all Users");
-      System.out.println("11. View all Products");
-      System.out.println("12. Update a User");
-      System.out.println("13. Update a Product");
+      System.out.println("9. View all Users");
+      System.out.println("10. View all Products");
+      System.out.println("11. Update a User");
+      System.out.println("12. Update a Product");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -543,7 +541,7 @@ public class Retail {
             return;
          }
          //Insert into Orders table
-         String q3 = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, now())", user, store, productName, units);
+         String q3 = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", user, store, productName, units);
          esql.executeUpdate(q3);
          //Update Product table
          String q4 = String.format("UPDATE Product SET numberOfUnits = numberOfUnits - %d WHERE storeID = '%d' AND productName = '%s'", units, store, productName);
@@ -563,8 +561,66 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void updateProduct(Retail esql) {}
-   public static void viewRecentUpdates(Retail esql) {}
+   public static void updateProduct(Retail esql, String user) {
+      try{
+         int valid = 0;
+         String[] values = {null,null,null,null};
+         List<String> validProduct=null;
+         String query = null;
+         query = String.format("SELECT * FROM Product P WHERE P.storeID IN (SELECT S.storeID FROM Store S WHERE S.managerID = %s) ORDER BY P.storeID;", user);
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Store ID: ");
+            values[0] = in.readLine().trim();
+            query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", values[0],user);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+         }while(valid<=0);
+         valid = 0;
+         do{
+         System.out.print("Enter Product Name: ");
+         values[1] = in.readLine().trim();
+         query = String.format("Select * FROM Product WHERE productName = '%s' AND storeID = %s;", values[1], values[0]);
+         valid = esql.executeQuery(query);
+         if(valid==0)
+            System.out.format("Product '%s' does not exist at Store %s! Please select valid product\n", values[1], values[0]);
+         }while(valid<=0);
+
+         validProduct=esql.executeQueryAndReturnResult(query).get(0);
+         System.out.format("Current Product : %s at Store %s\n",validProduct.get(1).trim(),validProduct.get(0).trim());
+         System.out.format("Current Quantity: %s\nNew Quantity (Press Enter to keep current): ", validProduct.get(2));
+         values[2] = in.readLine();
+         if(values[2].equals("")){
+            values[2] = validProduct.get(2);
+         }
+         System.out.format("Current Unit Price: %s\nNew Unit Price (Press Enter to keep current): ", validProduct.get(3));
+         values[3] = in.readLine();
+         if(values[3].equals("")){
+            values[3] = validProduct.get(3);
+         }
+         System.out.println("\nOriginal Product Info:");
+         esql.executeQueryAndPrintResult(query);
+         String update = String.format("UPDATE Product SET numberOfUnits = %s , pricePerUnit = %s WHERE storeID = %s AND productName = '%s';", values[2],values[3],values[0],values[1]);
+         esql.executeUpdate(update);
+         System.out.println("\nUpdated Product Info:");
+         esql.executeQueryAndPrintResult(query);
+         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp));", user, values[0], values[1]);
+         esql.executeUpdate(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void viewRecentUpdates(Retail esql, String user) {
+      try{
+         System.out.println("Displaying Recent Updates...");
+         String query = String.format("SELECT * FROM ProductUpdates U WHERE U.updatenumber IN (SELECT U1.updatenumber FROM Store S, ProductUpdates U1 WHERE S.managerID = %s AND U1.storeID = S.storeID AND S.storeID = U.storeID ORDER BY U1.updatedon DESC LIMIT 5) ORDER BY U.storeID,U.updatenumber DESC;",user);
+         esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+      
+   }
    public static void viewPopularProducts(Retail esql) {}
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
@@ -687,7 +743,7 @@ public class Retail {
          esql.executeUpdate(update);
          System.out.println("\nUpdated Product Info:");
          esql.executeQueryAndPrintResult(query);
-         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', now());", user, values[0], values[1]);
+         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp));", user, values[0], values[1]);
          esql.executeUpdate(query);
       }catch(Exception e){
          System.err.println(e.getMessage());
