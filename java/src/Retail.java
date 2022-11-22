@@ -541,7 +541,7 @@ public class Retail {
             return;
          }
          //Insert into Orders table
-         String q3 = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, now())", user, store, productName, units);
+         String q3 = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", user, store, productName, units);
          esql.executeUpdate(q3);
          //Update Product table
          String q4 = String.format("UPDATE Product SET numberOfUnits = numberOfUnits - %d WHERE storeID = '%d' AND productName = '%s'", units, store, productName);
@@ -605,7 +605,7 @@ public class Retail {
          esql.executeUpdate(update);
          System.out.println("\nUpdated Product Info:");
          esql.executeQueryAndPrintResult(query);
-         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', now());", user, values[0], values[1]);
+         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp));", user, values[0], values[1]);
          esql.executeUpdate(query);
       }catch(Exception e){
          System.err.println(e.getMessage());
@@ -743,7 +743,7 @@ public class Retail {
          esql.executeUpdate(update);
          System.out.println("\nUpdated Product Info:");
          esql.executeQueryAndPrintResult(query);
-         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', now());", user, values[0], values[1]);
+         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp));", user, values[0], values[1]);
          esql.executeUpdate(query);
       }catch(Exception e){
          System.err.println(e.getMessage());
