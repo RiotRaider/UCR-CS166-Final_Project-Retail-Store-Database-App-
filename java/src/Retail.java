@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.lang.Math;
+import java.util.Scanner;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -400,6 +401,13 @@ public class Retail {
       }
    }//end CreateUser
 
+   //Function to call to wait for user to prompt to continue
+   //Use to let user view data sets before new prompts or menus print
+   public static void printWait(){
+      System.out.print("Press <ENTER>...");
+      Scanner s = new Scanner(System.in);
+      s.nextLine();
+   }
    public static void custMenu(){
       System.out.println("\n\nMAIN MENU");
       System.out.println("---------");
@@ -479,6 +487,7 @@ public class Retail {
       try{
          String query = String.format("SELECT S.storeID, S.name, calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude) AS distance FROM Store S, Users U WHERE U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", user);
          esql.executeQueryAndPrintResult(query);
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -499,6 +508,7 @@ public class Retail {
 
       String query = String.format("SELECT P.productName as Name, P.numberOfUnits as Qty, P.pricePerUnit as Unit_Price FROM Product P WHERE P.storeID = '%d';",store);
       esql.executeQueryAndPrintResult(query);
+      printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -557,6 +567,7 @@ public class Retail {
       try{
          String query = String.format("SELECT S.storeID, S.name, O.productName, O.unitsOrdered, O.orderTime FROM Store S, Orders O WHERE '%s' = O.customerID AND O.storeID = S.storeID ORDER BY O.orderTime desc LIMIT 5;", user);
          esql.executeQueryAndPrintResult(query);
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -607,6 +618,7 @@ public class Retail {
          esql.executeQueryAndPrintResult(query);
          query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp));", user, values[0], values[1]);
          esql.executeUpdate(query);
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -616,6 +628,7 @@ public class Retail {
          System.out.println("Displaying Recent Updates...");
          String query = String.format("SELECT * FROM ProductUpdates U WHERE U.updatenumber IN (SELECT U1.updatenumber FROM Store S, ProductUpdates U1 WHERE S.managerID = %s AND U1.storeID = S.storeID AND S.storeID = U.storeID ORDER BY U1.updatedon DESC LIMIT 5) ORDER BY U.storeID,U.updatenumber DESC;",user);
          esql.executeQueryAndPrintResult(query);
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -629,6 +642,7 @@ public class Retail {
        try{
          String query = String.format("SELECT * FROM Users ORDER BY type,name;");
          esql.executeQueryAndPrintResult(query);
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -637,6 +651,7 @@ public class Retail {
       try{
          String query = String.format("SELECT * FROM Product ORDER BY storeID,productName;");
          esql.executeQueryAndPrintResult(query);
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -694,7 +709,7 @@ public class Retail {
          esql.executeUpdate(update);
          System.out.println("\nUpdated User Info:");
          esql.executeQueryAndPrintResult(query);
-
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
@@ -745,6 +760,7 @@ public class Retail {
          esql.executeQueryAndPrintResult(query);
          query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp));", user, values[0], values[1]);
          esql.executeUpdate(query);
+         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
