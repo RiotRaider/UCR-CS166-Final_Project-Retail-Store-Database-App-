@@ -294,8 +294,8 @@ public class Retail {
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
                      case 5: viewRecentUpdates(esql, authorisedUser); break;
-                     case 6: viewPopularProducts(esql); break;
-                     case 7: viewPopularCustomers(esql); break;
+                     case 6: viewPopularProducts(esql, authorisedUser); break;
+                     case 7: viewPopularCustomers(esql, authorisedUser); break;
                      case 8: placeProductSupplyRequests(esql); break;
                      case 9:adminViewUsers(esql);break;
                      case 10:adminViewProducts(esql);break;
@@ -313,8 +313,8 @@ public class Retail {
                      case 4: viewRecentOrders(esql, authorisedUser); break;
                      case 5: updateProduct(esql, authorisedUser); break;
                      case 6: viewRecentUpdates(esql, authorisedUser); break;
-                     case 7: viewPopularProducts(esql); break;
-                     case 8: viewPopularCustomers(esql); break;
+                     case 7: viewPopularProducts(esql, authorisedUser); break;
+                     case 8: viewPopularCustomers(esql, authorisedUser); break;
                      case 9: placeProductSupplyRequests(esql); break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
@@ -634,8 +634,24 @@ public class Retail {
       }
       
    }
-   public static void viewPopularProducts(Retail esql) {}
-   public static void viewPopularCustomers(Retail esql) {}
+   public static void viewPopularProducts(Retail esql, String user) {//View the most popular products across all the manager's stores
+      try{
+         String query = String.format("SELECT O.productName, COUNT(*) as NumOfOrders FROM Store S, Orders O WHERE O.storeID=S.storeID AND S.managerID = '%s' GROUP BY O.productName ORDER BY COUNT(*) DESC LIMIT 5;", user);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void viewPopularCustomers(Retail esql, String user) {//View the most popular customers across all the manager's stores
+      try{
+         String query = String.format("SELECT O.customerID, U.name, COUNT(*) as NumOfOrders FROM Store S, Orders O, Users U WHERE O.storeID=S.storeID AND S.managerID = '%s' AND O.customerID=U.userID GROUP BY O.customerID, U.name ORDER BY COUNT(*) DESC LIMIT 5;", user);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void placeProductSupplyRequests(Retail esql) {}
 
    public static void adminViewUsers(Retail esql) {
