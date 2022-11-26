@@ -311,7 +311,7 @@ public class Retail {
                      case 6: viewRecentUpdates(esql, authorisedUser); break;
                      case 7: viewPopularProducts(esql); break;
                      case 8: viewPopularCustomers(esql); break;
-                     case 9: placeProductSupplyRequests(esql); break;
+                     case 9: placeProductSupplyRequests(esql,authorisedUser); break;
                      case 10: viewStoreOrders(esql, authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
@@ -641,7 +641,70 @@ public class Retail {
    }
    public static void viewPopularProducts(Retail esql) {}
    public static void viewPopularCustomers(Retail esql) {}
-   public static void placeProductSupplyRequests(Retail esql) {}
+   public static void placeProductSupplyRequests(Retail esql, String user) {
+      try{
+         int valid = 0;
+         int qty = 0;
+         String query;
+         String[] values = {null,null,null};
+         query = String.format("SELECT * FROM Warehouse ORDER BY warehouseID;");
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Warehouse ID: ");
+            values[0] = in.readLine().trim();
+            query = String.format("SELECT * FROM Warehouse WHERE warehouseID= %s;",values[0]);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Choice! Please select a warehouse\n",user);
+         }while(valid<=0);
+         valid=0;
+         query = String.format("SELECT storeID, name, dateestablished FROM Store WHERE managerID=%s;", user);
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Store ID: ");
+            values[1] = in.readLine().trim();
+            query = String.format("SELECT * FROM Store WHERE storeID= %s AND managerID = %s;",values[1],user);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store you manage\n",user);
+         }while(valid<=0);
+         valid=0;
+         query = String.format("SELECT productName, numberOfUnits FROM Product WHERE storeID=%s ORDER BY productName;", values[1]);
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Product Name: ");
+            values[2] = in.readLine().trim();
+            query = String.format("Select * FROM Product WHERE storeID= %s AND productName = '%s';",values[1],values[2]);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Choice! Please select a valid product\n",user);}while(valid<=0);
+         valid=0;
+         do{ 
+            System.out.print("Enter Quantity: ");
+            try { 
+               qty = Integer.parseInt(in.readLine());
+               valid=1;
+               break;
+            }catch (Exception e) {
+               System.out.println("Enter a valid amount!");
+               continue;
+            }
+         }while(valid<=0);
+         int curQty = Integer.parseInt(esql.executeQueryAndReturnResult(String.format("SELECT numberOfUnits FROM Product WHERE storeID =%s AND productName = '%s'", values[1],values[2])).get(0).get(0));
+         System.out.println("Update Product");
+         query = String.format("UPDATE Product SET numberOfUnits = %s WHERE storeID = %s AND productName = '%s';", (qty+curQty),values[1],values[2]);
+         esql.executeUpdate(query);
+         System.out.println("Insert Product Request");
+         query = String.format("INSERT INTO ProductSupplyRequests(managerID,warehouseID,storeID,productName,unitsRequested) VALUES (%s, %s, %s, '%s', %d); ",user, values[0],values[1],values[2],qty);
+         esql.executeUpdate(query);
+         System.out.println("Order Submitted...");
+         query = String.format("SELECT * FROM ProductSupplyRequests ORDER BY requestNumber DESC LIMIT 1;");
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewStoreOrders(Retail esql, String user){
       try{
          String query;
