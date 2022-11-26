@@ -727,7 +727,6 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-
    public static void adminViewUsers(Retail esql) {
        try{
          String query = String.format("SELECT * FROM Users ORDER BY type,name;");
