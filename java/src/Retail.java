@@ -579,7 +579,7 @@ public class Retail {
             query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", values[0],user);
             valid = esql.executeQuery(query);
             if(valid == 0)
-               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+               System.out.format("Invalid Store Choice! Please select a store where you manage\n", user);
          }while(valid<=0);
          valid = 0;
          do{
@@ -618,8 +618,20 @@ public class Retail {
    }
    public static void viewRecentUpdates(Retail esql, String user) {
       try{
-         System.out.println("Displaying Recent Updates...");
-         String query = String.format("SELECT * FROM ProductUpdates U WHERE U.updatenumber IN (SELECT U1.updatenumber FROM Store S, ProductUpdates U1 WHERE S.managerID = %s AND U1.storeID = S.storeID AND S.storeID = U.storeID ORDER BY U1.updatedon DESC LIMIT 5) ORDER BY U.storeID,U.updatenumber DESC;",user);
+         String store;
+         int valid=0;
+         String query = String.format("SELECT storeID FROM Store WHERE managerID = %s;", user);
+         System.out.println("Stores You Manage:");
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Store ID: ");
+            store = in.readLine().trim();
+            query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;",store,user);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store you manage\n",user);
+         }while(valid<=0);
+         query = String.format("SELECT * FROM ProductUpdates WHERE storeID = %s ORDER BY productName LIMIT 5;",store);
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
