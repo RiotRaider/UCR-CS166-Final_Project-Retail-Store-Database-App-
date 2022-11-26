@@ -293,14 +293,10 @@ public class Retail {
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
-                     case 5: viewRecentUpdates(esql, authorisedUser); break;
-                     case 6: viewPopularProducts(esql); break;
-                     case 7: viewPopularCustomers(esql); break;
-                     case 8: placeProductSupplyRequests(esql); break;
-                     case 9:adminViewUsers(esql);break;
-                     case 10:adminViewProducts(esql);break;
-                     case 11:System.out.println("Update User...");adminUpdateUser(esql);break;
-                     case 12:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
+                     case 5:adminViewUsers(esql);break;
+                     case 6:adminViewProducts(esql);break;
+                     case 7:adminUpdateUser(esql);break;
+                     case 8:adminUpdateProduct(esql,authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -316,6 +312,7 @@ public class Retail {
                      case 7: viewPopularProducts(esql); break;
                      case 8: viewPopularCustomers(esql); break;
                      case 9: placeProductSupplyRequests(esql); break;
+                     case 10: viewStoreOrders(esql, authorisedUser)break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -432,6 +429,7 @@ public class Retail {
       System.out.println("7. View 5 Popular Items");
       System.out.println("8. View 5 Popular Customers");
       System.out.println("9. Place Product Supply Request to Warehouse");
+      System.out.println("10.View Orders at Store");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -442,16 +440,11 @@ public class Retail {
       System.out.println("2. View Product List");
       System.out.println("3. Place a Order");
       System.out.println("4. View 5 recent orders");
-      System.out.println("\n***MANAGER OPTIONS***");
-      System.out.println("5. View 5 recent Product Updates Info");
-      System.out.println("6. View 5 Popular Items");
-      System.out.println("7. View 5 Popular Customers");
-      System.out.println("8. Place Product Supply Request to Warehouse");
       System.out.println("\n***ADMIN OPTIONS***");
-      System.out.println("9. View all Users");
-      System.out.println("10. View all Products");
-      System.out.println("11. Update a User");
-      System.out.println("12. Update a Product");
+      System.out.println("5. View all Users");
+      System.out.println("6. View all Products");
+      System.out.println("7. Update a User");
+      System.out.println("8. Update a Product");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -637,6 +630,7 @@ public class Retail {
    public static void viewPopularProducts(Retail esql) {}
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
+   public static void viewStoreOrders(Retail esql, String user){}
 
    public static void adminViewUsers(Retail esql) {
        try{
