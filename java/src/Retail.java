@@ -312,7 +312,7 @@ public class Retail {
                      case 7: viewPopularProducts(esql); break;
                      case 8: viewPopularCustomers(esql); break;
                      case 9: placeProductSupplyRequests(esql); break;
-                     case 10: viewStoreOrders(esql, authorisedUser)break;
+                     case 10: viewStoreOrders(esql, authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -630,7 +630,28 @@ public class Retail {
    public static void viewPopularProducts(Retail esql) {}
    public static void viewPopularCustomers(Retail esql) {}
    public static void placeProductSupplyRequests(Retail esql) {}
-   public static void viewStoreOrders(Retail esql, String user){}
+   public static void viewStoreOrders(Retail esql, String user){
+      try{
+         String query;
+         String store;
+         int valid=0;
+         query = String.format("Select storeID FROM Store WHERE managerID = %s;",user);
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.println("Select Store to View:");
+            store = in.readLine().trim();
+            query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,user);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+         }while(valid <=0);
+         query = String.format("SELECT * FROM Orders WHERE storeID = %s ORDER BY ordertime DESC;", store);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
 
    public static void adminViewUsers(Retail esql) {
        try{
