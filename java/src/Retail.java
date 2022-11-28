@@ -309,8 +309,8 @@ public class Retail {
                      case 4: viewRecentOrders(esql, authorisedUser); break;
                      case 5: updateProduct(esql, authorisedUser); break;
                      case 6: viewRecentUpdates(esql, authorisedUser); break;
-                     case 7: viewPopularProducts(esql); break;
-                     case 8: viewPopularCustomers(esql); break;
+                     case 7: viewPopularProducts(esql, authorisedUser); break;
+                     case 8: viewPopularCustomers(esql, authorisedUser); break;
                      case 9: placeProductSupplyRequests(esql,authorisedUser); break;
                      case 10: viewStoreOrders(esql, authorisedUser);break;
                      case 20: usermenu = false; break;
@@ -639,8 +639,46 @@ public class Retail {
       }
       
    }
-   public static void viewPopularProducts(Retail esql) {}
-   public static void viewPopularCustomers(Retail esql) {}
+   public static void viewPopularProducts(Retail esql, String user) {//View the most popular products in a store
+      try{
+         int valid = 0;
+         String store;
+         do{
+            String q1;
+            System.out.print("Enter Store ID: ");
+            store = in.readLine().trim();
+            q1 = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,user);
+            valid = esql.executeQuery(q1);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+         }while(valid<=0);
+         String query = String.format("SELECT O.productName, COUNT(*) as NumOfOrders FROM Orders O WHERE O.storeID ='%s' GROUP BY O.productName ORDER BY COUNT(*) DESC LIMIT 5;", store);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void viewPopularCustomers(Retail esql, String user) {//View the most popular customers across all the manager's stores
+      try{
+         int valid = 0;
+         String store;
+         do{
+            String q1;
+            System.out.print("Enter Store ID: ");
+            store = in.readLine().trim();
+            q1 = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,user);
+            valid = esql.executeQuery(q1);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+         }while(valid<=0);
+         String query = String.format("SELECT O.customerID, U.name, COUNT(*) as NumOfOrders FROM Orders O, Users U WHERE O.storeID='%s' AND O.customerID=U.userID GROUP BY O.customerID, U.name ORDER BY COUNT(*) DESC LIMIT 5;", store);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void placeProductSupplyRequests(Retail esql, String user) {
       try{
          int valid = 0;
