@@ -293,14 +293,10 @@ public class Retail {
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql, authorisedUser); break;
                      case 4: viewRecentOrders(esql, authorisedUser); break;
-                     case 5: viewRecentUpdates(esql, authorisedUser); break;
-                     case 6: viewPopularProducts(esql, authorisedUser); break;
-                     case 7: viewPopularCustomers(esql, authorisedUser); break;
-                     case 8: placeProductSupplyRequests(esql); break;
-                     case 9:adminViewUsers(esql);break;
-                     case 10:adminViewProducts(esql);break;
-                     case 11:System.out.println("Update User...");adminUpdateUser(esql);break;
-                     case 12:System.out.println("Update Product...");adminUpdateProduct(esql,authorisedUser);break;
+                     case 5:adminViewUsers(esql);break;
+                     case 6:adminViewProducts(esql);break;
+                     case 7:adminUpdateUser(esql);break;
+                     case 8:adminUpdateProduct(esql,authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -315,7 +311,8 @@ public class Retail {
                      case 6: viewRecentUpdates(esql, authorisedUser); break;
                      case 7: viewPopularProducts(esql, authorisedUser); break;
                      case 8: viewPopularCustomers(esql, authorisedUser); break;
-                     case 9: placeProductSupplyRequests(esql); break;
+                     case 9: placeProductSupplyRequests(esql,authorisedUser); break;
+                     case 10: viewStoreOrders(esql, authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -432,6 +429,7 @@ public class Retail {
       System.out.println("7. View 5 Popular Items");
       System.out.println("8. View 5 Popular Customers");
       System.out.println("9. Place Product Supply Request to Warehouse");
+      System.out.println("10.View Orders at Store");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -442,16 +440,11 @@ public class Retail {
       System.out.println("2. View Product List");
       System.out.println("3. Place a Order");
       System.out.println("4. View 5 recent orders");
-      System.out.println("\n***MANAGER OPTIONS***");
-      System.out.println("5. View 5 recent Product Updates Info");
-      System.out.println("6. View 5 Popular Items");
-      System.out.println("7. View 5 Popular Customers");
-      System.out.println("8. Place Product Supply Request to Warehouse");
       System.out.println("\n***ADMIN OPTIONS***");
-      System.out.println("9. View all Users");
-      System.out.println("10. View all Products");
-      System.out.println("11. Update a User");
-      System.out.println("12. Update a Product");
+      System.out.println("5. View all Users");
+      System.out.println("6. View all Products");
+      System.out.println("7. Update a User");
+      System.out.println("8. Update a Product");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -586,7 +579,7 @@ public class Retail {
             query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", values[0],user);
             valid = esql.executeQuery(query);
             if(valid == 0)
-               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+               System.out.format("Invalid Store Choice! Please select a store where you manage\n", user);
          }while(valid<=0);
          valid = 0;
          do{
@@ -625,8 +618,20 @@ public class Retail {
    }
    public static void viewRecentUpdates(Retail esql, String user) {
       try{
-         System.out.println("Displaying Recent Updates...");
-         String query = String.format("SELECT * FROM ProductUpdates U WHERE U.updatenumber IN (SELECT U1.updatenumber FROM Store S, ProductUpdates U1 WHERE S.managerID = %s AND U1.storeID = S.storeID AND S.storeID = U.storeID ORDER BY U1.updatedon DESC LIMIT 5) ORDER BY U.storeID,U.updatenumber DESC;",user);
+         String store;
+         int valid=0;
+         String query = String.format("SELECT storeID FROM Store WHERE managerID = %s;", user);
+         System.out.println("Stores You Manage:");
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Store ID: ");
+            store = in.readLine().trim();
+            query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;",store,user);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store you manage\n",user);
+         }while(valid<=0);
+         query = String.format("SELECT * FROM ProductUpdates WHERE storeID = %s ORDER BY productName LIMIT 5;",store);
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
@@ -674,8 +679,92 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void placeProductSupplyRequests(Retail esql) {}
-
+   public static void placeProductSupplyRequests(Retail esql, String user) {
+      try{
+         int valid = 0;
+         int qty = 0;
+         String query;
+         String[] values = {null,null,null};
+         query = String.format("SELECT * FROM Warehouse ORDER BY warehouseID;");
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Warehouse ID: ");
+            values[0] = in.readLine().trim();
+            query = String.format("SELECT * FROM Warehouse WHERE warehouseID= %s;",values[0]);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Choice! Please select a warehouse\n",user);
+         }while(valid<=0);
+         valid=0;
+         query = String.format("SELECT storeID, name, dateestablished FROM Store WHERE managerID=%s;", user);
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Store ID: ");
+            values[1] = in.readLine().trim();
+            query = String.format("SELECT * FROM Store WHERE storeID= %s AND managerID = %s;",values[1],user);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store you manage\n",user);
+         }while(valid<=0);
+         valid=0;
+         query = String.format("SELECT productName, numberOfUnits FROM Product WHERE storeID=%s ORDER BY productName;", values[1]);
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.print("Enter Product Name: ");
+            values[2] = in.readLine().trim();
+            query = String.format("Select * FROM Product WHERE storeID= %s AND productName = '%s';",values[1],values[2]);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Choice! Please select a valid product\n",user);}while(valid<=0);
+         valid=0;
+         do{ 
+            System.out.print("Enter Quantity: ");
+            try { 
+               qty = Integer.parseInt(in.readLine());
+               valid=1;
+               break;
+            }catch (Exception e) {
+               System.out.println("Enter a valid amount!");
+               continue;
+            }
+         }while(valid<=0);
+         int curQty = Integer.parseInt(esql.executeQueryAndReturnResult(String.format("SELECT numberOfUnits FROM Product WHERE storeID =%s AND productName = '%s'", values[1],values[2])).get(0).get(0));
+         System.out.println("Update Product");
+         query = String.format("UPDATE Product SET numberOfUnits = %s WHERE storeID = %s AND productName = '%s';", (qty+curQty),values[1],values[2]);
+         esql.executeUpdate(query);
+         System.out.println("Insert Product Request");
+         query = String.format("INSERT INTO ProductSupplyRequests(managerID,warehouseID,storeID,productName,unitsRequested) VALUES (%s, %s, %s, '%s', %d); ",user, values[0],values[1],values[2],qty);
+         esql.executeUpdate(query);
+         System.out.println("Order Submitted...");
+         query = String.format("SELECT * FROM ProductSupplyRequests ORDER BY requestNumber DESC LIMIT 1;");
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
+   public static void viewStoreOrders(Retail esql, String user){
+      try{
+         String query;
+         String store;
+         int valid=0;
+         query = String.format("Select storeID FROM Store WHERE managerID = %s;",user);
+         esql.executeQueryAndPrintResult(query);
+         do{
+            System.out.println("Select Store to View:");
+            store = in.readLine().trim();
+            query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,user);
+            valid = esql.executeQuery(query);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+         }while(valid <=0);
+         query = String.format("SELECT * FROM Orders WHERE storeID = %s ORDER BY ordertime DESC;", store);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void adminViewUsers(Retail esql) {
        try{
          String query = String.format("SELECT * FROM Users ORDER BY type,name;");
