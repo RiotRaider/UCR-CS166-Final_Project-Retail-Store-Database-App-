@@ -634,9 +634,20 @@ public class Retail {
       }
       
    }
-   public static void viewPopularProducts(Retail esql, String user) {//View the most popular products across all the manager's stores
+   public static void viewPopularProducts(Retail esql, String user) {//View the most popular products in a store
       try{
-         String query = String.format("SELECT O.productName, COUNT(*) as NumOfOrders FROM Store S, Orders O WHERE O.storeID=S.storeID AND S.managerID = '%s' GROUP BY O.productName ORDER BY COUNT(*) DESC LIMIT 5;", user);
+         int valid = 0;
+         String store;
+         do{
+            String q1;
+            System.out.print("Enter Store ID: ");
+            store = in.readLine().trim();
+            q1 = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,user);
+            valid = esql.executeQuery(q1);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+         }while(valid<=0);
+         String query = String.format("SELECT O.productName, COUNT(*) as NumOfOrders FROM Orders O WHERE O.storeID ='%s' GROUP BY O.productName ORDER BY COUNT(*) DESC LIMIT 5;", store);
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
@@ -645,7 +656,18 @@ public class Retail {
    }
    public static void viewPopularCustomers(Retail esql, String user) {//View the most popular customers across all the manager's stores
       try{
-         String query = String.format("SELECT O.customerID, U.name, COUNT(*) as NumOfOrders FROM Store S, Orders O, Users U WHERE O.storeID=S.storeID AND S.managerID = '%s' AND O.customerID=U.userID GROUP BY O.customerID, U.name ORDER BY COUNT(*) DESC LIMIT 5;", user);
+         int valid = 0;
+         String store;
+         do{
+            String q1;
+            System.out.print("Enter Store ID: ");
+            store = in.readLine().trim();
+            q1 = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,user);
+            valid = esql.executeQuery(q1);
+            if(valid == 0)
+               System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", user);
+         }while(valid<=0);
+         String query = String.format("SELECT O.customerID, U.name, COUNT(*) as NumOfOrders FROM Orders O, Users U WHERE O.storeID='%s' AND O.customerID=U.userID GROUP BY O.customerID, U.name ORDER BY COUNT(*) DESC LIMIT 5;", store);
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
