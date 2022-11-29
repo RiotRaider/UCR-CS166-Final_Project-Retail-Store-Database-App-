@@ -387,14 +387,36 @@ public class Retail {
          String name = in.readLine();
          System.out.print("\tEnter password: ");
          String password = in.readLine();
-         System.out.print("\tEnter latitude: ");   
-         String latitude = in.readLine();       //enter lat value between [0.0, 100.0]
-         System.out.print("\tEnter longitude: ");  //enter long value between [0.0, 100.0]
-         String longitude = in.readLine();
+         int latitude; // latitude must be between [0, 100]
+         do {
+            System.out.print("\tEnter latitude: ");
+            try { 
+               latitude = Integer.parseInt(in.readLine());
+               if (!(latitude<0 || latitude>100))
+                  break;
+               System.out.println("\tLatitude must be a value between 0 and 100!");
+            }catch (Exception e) {
+               System.out.println("\tYour input is invalid!");
+               continue;
+            }
+         }while (true);
+         int longitude;// longitude must be between [0, 100]
+         do {
+            System.out.print("\tEnter longitude: ");
+            try { 
+               longitude = Integer.parseInt(in.readLine());
+               if (!(longitude<0 || longitude>100))
+                  break;
+               System.out.println("\tLongitude must be a value between 0 and 100!");
+            }catch (Exception e) {
+               System.out.println("\tYour input is invalid!");
+               continue;
+            }//end try
+         }while (true);
          
          String type="customer";
 
-			String query = String.format("INSERT INTO USERS (name, password, latitude, longitude, type) VALUES ('%s','%s', %s, %s,'%s')", name, password, latitude, longitude, type);
+			String query = String.format("INSERT INTO USERS (name, password, latitude, longitude, type) VALUES ('%s','%s', %d, %s,'%s')", name, password, latitude, longitude, type);
 
          esql.executeUpdate(query);
          System.out.println ("User successfully created!");
