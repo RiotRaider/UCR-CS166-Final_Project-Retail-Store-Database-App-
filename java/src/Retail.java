@@ -40,6 +40,8 @@ public class Retail {
    // This variable can be global for convenience.
    static BufferedReader in = new BufferedReader(
                                 new InputStreamReader(System.in));
+   String userID;
+   String userType;
 
    /**
     * Creates a new instance of Retail shop
@@ -281,8 +283,8 @@ public class Retail {
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
             if (authorisedUserData != null) {
-              String authorisedUser = authorisedUserData.get(0).trim();
-              String authorisedUserType = authorisedUserData.get(1).trim();
+              esql.userID=authorisedUserData.get(0).trim();
+              esql.userType = authorisedUserData.get(1).trim();
               boolean usermenu = true;
 
               while(usermenu) {
