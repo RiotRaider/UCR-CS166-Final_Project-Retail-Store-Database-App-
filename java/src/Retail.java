@@ -545,38 +545,40 @@ public class Retail {
          int store;
          String productName;
          int units;
+         String query;
          do { // StoreID input
             System.out.print("\tEnter Store ID: ");
             try { // read the integer, parse it and break.
                store = Integer.parseInt(in.readLine());
+               query = String.format("SELECT S.storeID FROM Store S, Users U WHERE S.storeID = '%d' AND U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", store, esql.userID);
+               if(esql.executeQuery(query)==0){
+                  System.out.println("\tThe store does not exist or is too far!");
+                  continue;
+               }
                break;
             }catch (Exception e) {
                System.out.println("Your input is invalid!");
                continue;
             }//end try
          }while (true);
-         System.out.print("\tEnter Product Name: ");// Product name input
-         productName = in.readLine();
-         do { // Number of units input
+         do{ //Product name input
+            System.out.print("\tEnter Product Name: ");
+            productName = in.readLine();
             System.out.print("\tEnter Number of units: ");
             try { // read the integer, parse it and break.
                units = Integer.parseInt(in.readLine());
-               break;
             }catch (Exception e) {
-               System.out.println("Your input is invalid!");
+               System.out.println("\tYour input is invalid!");
                continue;
             }//end try
-         }while (true);
-         String q1 = String.format("SELECT S.storeID FROM Store S, Users U WHERE S.storeID = '%d' AND U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", store, esql.userID);
-         if(esql.executeQuery(q1)==0){
-            System.out.println("The store does not exist or is too far!");
-            return;
-         }
-         String q2 = String.format("SELECT storeID FROM Product WHERE storeID = '%d' AND productName = '%s' AND numberOfUnits>=%d;", store, productName, units);
-         if(esql.executeQuery(q2)==0){
-            System.out.println("The product does not exists or there is not enough stock!");
-            return;
-         }
+            query = String.format("SELECT storeID FROM Product WHERE storeID = '%d' AND productName = '%s' AND numberOfUnits>=%d;", store, productName, units);
+            if(esql.executeQuery(query)==0){
+               System.out.println("\tThe product does not exists or there is not enough stock!");
+               continue;
+            }
+            break;
+         }while(true);
+         
          //Insert into Orders table
          String q3 = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", esql.userID, store, productName, units);
          esql.executeUpdate(q3);
