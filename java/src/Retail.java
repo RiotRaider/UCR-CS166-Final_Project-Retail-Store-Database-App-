@@ -651,10 +651,9 @@ public class Retail {
    public static void viewRecentUpdates(Retail esql) {
       try{
          String store;
+         String query;
          int valid=0;
-         String query = String.format("SELECT type FROM Users WHERE userID = %s;", esql.userID);
-         String type = esql.executeQueryAndReturnResult(query).get(0).get(0).trim();
-         if(type.equals("admin")){
+         if(esql.userType.equals("admin")){
             query = String.format("SELECT storeID, name FROM Store;");
             System.out.println("Stores:");
             esql.executeQueryAndPrintResult(query);
@@ -679,7 +678,7 @@ public class Retail {
                   System.out.format("Invalid Store Choice! Please select a store you manage\n",esql.userID);
             }while(valid<=0);
          }
-         query = String.format("SELECT * FROM ProductUpdates WHERE storeID = %s ORDER BY productName LIMIT 5;",store);
+         query = String.format("SELECT * FROM ProductUpdates WHERE storeID = %s ORDER BY updateNumber DESC LIMIT 5;",store);
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
@@ -691,10 +690,9 @@ public class Retail {
       try{
          int valid = 0;
          String store;
-         String query = String.format("SELECT type FROM Users WHERE userID = %s;", esql.userID);
-         String type = esql.executeQueryAndReturnResult(query).get(0).get(0).trim();
+         String query;
          String q1;
-         if(type.equals("admin")){
+         if(esql.userType.equals("admin")){
             query = String.format("SELECT storeID, name FROM Store;");
             System.out.println("Stores:");
             esql.executeQueryAndPrintResult(query);
@@ -730,10 +728,9 @@ public class Retail {
       try{
          int valid = 0;
          String store;
-         String query = String.format("SELECT type FROM Users WHERE userID = %s;", esql.userID);
-         String type = esql.executeQueryAndReturnResult(query).get(0).get(0).trim();
+         String query;
          String q1;
-         if(type.equals("admin")){
+         if(esql.userType.equals("admin")){
             query = String.format("SELECT storeID, name FROM Store;");
             System.out.println("Stores:");
             esql.executeQueryAndPrintResult(query);
@@ -769,8 +766,7 @@ public class Retail {
       try{
          int valid = 0;
          int qty = 0;
-         String query= String.format("SELECT type FROM Users WHERE userID = %s;", esql.userID);
-         String type = esql.executeQueryAndReturnResult(query).get(0).get(0).trim();
+         String query;
          String[] values = {null,null,null};
          query = String.format("SELECT * FROM Warehouse ORDER BY warehouseID;");
          esql.executeQueryAndPrintResult(query);
@@ -783,7 +779,7 @@ public class Retail {
                System.out.format("Invalid Choice! Please select a warehouse\n",esql.userID);
          }while(valid<=0);
          valid=0;
-         if(type.equals("admin")){
+         if(esql.userType.equals("admin")){
             query = String.format("SELECT storeID, name, dateestablished FROM Store;");
             esql.executeQueryAndPrintResult(query);
             do{
@@ -845,11 +841,10 @@ public class Retail {
    }
    public static void viewStoreOrders(Retail esql){
       try{
-         String query = String.format("SELECT type FROM Users WHERE userID = %s;", esql.userID);
-         String type = esql.executeQueryAndReturnResult(query).get(0).get(0).trim();;
+         String query;
          String store;
          int valid=0;
-         if(type.equals("admin")){
+         if(esql.userType.equals("admin")){
             query = String.format("Select storeID, name, dateestablished FROM Store;");
             esql.executeQueryAndPrintResult(query);
             do{
