@@ -297,6 +297,11 @@ public class Retail {
                      case 6:adminViewProducts(esql);break;
                      case 7:adminUpdateUser(esql);break;
                      case 8:adminUpdateProduct(esql,authorisedUser);break;
+                     case 9: viewRecentUpdates(esql, authorisedUser); break;
+                     case 10: viewPopularProducts(esql, authorisedUser); break;
+                     case 11: viewPopularCustomers(esql, authorisedUser); break;
+                     case 12: placeProductSupplyRequests(esql,authorisedUser); break;
+                     case 13: viewStoreOrders(esql, authorisedUser);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -445,6 +450,11 @@ public class Retail {
       System.out.println("6. View all Products");
       System.out.println("7. Update a User");
       System.out.println("8. Update a Product");
+      System.out.println("9. View 5 recent Product Updates Info");
+      System.out.println("10. View 5 Popular Items");
+      System.out.println("11. View 5 Popular Customers");
+      System.out.println("12. Place Product Supply Request to Warehouse");
+      System.out.println("13.View Orders at Store");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
