@@ -666,6 +666,9 @@ public class Retail {
          String query = String.format("SELECT S.storeID, S.name, O.productName, O.unitsOrdered, O.orderTime FROM Store S, Orders O WHERE '%s' = O.customerID AND O.storeID = S.storeID ORDER BY O.orderTime desc LIMIT 5;", esql.userID);
          System.out.println();
          esql.executeQueryAndPrintResult(query);
+         if(esql.executeQuery(query)==0){
+            System.out.println("\tYou have no orders to view");
+         }
          printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
@@ -823,6 +826,9 @@ public class Retail {
          String query = String.format("SELECT * FROM Orders WHERE storeID = %s ORDER BY ordertime DESC;", store);
          System.out.println();
          esql.executeQueryAndPrintResult(query);
+         if(esql.executeQuery(query)==0){
+            System.out.println("\tThis store has no orders to view");
+         }
          printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
