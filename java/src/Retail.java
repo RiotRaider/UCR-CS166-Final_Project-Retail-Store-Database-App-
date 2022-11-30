@@ -573,7 +573,7 @@ public class Retail {
             while(true){
                System.out.print("\tEnter Product Name: ");
                productName = in.readLine().trim();
-               query = String.format("SELECT * FROM Product WHERE storeID = %d AND productName = %s;",store,productName);
+               query = String.format("SELECT * FROM Product WHERE storeID = %d AND productName = '%s';",store,productName);
                if(esql.executeQuery(query)==0){
                   System.out.println("Invalid Product...");
                }else{break;}
@@ -599,6 +599,11 @@ public class Retail {
          //Update Product table
          String q4 = String.format("UPDATE Product SET numberOfUnits = numberOfUnits - %d WHERE storeID = '%d' AND productName = '%s'", units, store, productName);
          esql.executeUpdate(q4);
+         //Feedback to user
+         System.out.println("\nOrder Submitted...");
+         query = String.format("SELECT * FROM Orders WHERE customerID=%s ORDER BY orderNumber DESC LIMIT 1;",esql.userID);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
       }
       catch(Exception e){
          System.err.println(e.getMessage());
