@@ -291,14 +291,14 @@ public class Retail {
                if(esql.userType.equals("admin")){
                   adminMenu();
                   switch (readChoice()){
-                     case 1: viewStores(esql); break;
+                     case 1: viewStores(esql);printWait(); break;
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql); break;
                      case 4: viewRecentOrders(esql); break;
                      case 5: adminViewUsers(esql);break;
                      case 6: adminViewProducts(esql);break;
                      case 7: adminUpdateUser(esql);break;
-                     case 8: adminUpdateProduct(esql);break;
+                     case 8: updateProduct(esql);break;
                      case 9: viewRecentUpdates(esql); break;
                      case 10: viewPopularProducts(esql); break;
                      case 11: viewPopularCustomers(esql); break;
@@ -310,7 +310,7 @@ public class Retail {
                }else if(esql.userType.equals("manager")){
                   manageMenu();
                   switch (readChoice()){
-                     case 1: viewStores(esql); break;
+                     case 1: viewStores(esql);printWait(); break;
                      case 2: viewProducts(esql); break;
                      case 3: placeOrder(esql); break;
                      case 4: viewRecentOrders(esql); break;
@@ -326,7 +326,7 @@ public class Retail {
                }else{
                   custMenu();
                switch (readChoice()){
-                  case 1: viewStores(esql); break;
+                  case 1: viewStores(esql);printWait(); break;
                   case 2: viewProducts(esql); break;
                   case 3: placeOrder(esql); break;
                   case 4: viewRecentOrders(esql); break;
@@ -430,7 +430,7 @@ public class Retail {
    //Function to call to wait for user to prompt to continue
    //Use to let user view data sets before new prompts or menus print
    public static void printWait(){
-      System.out.print("Press <ENTER>...");
+      System.out.print("\n\nPress <ENTER>...");
       Scanner s = new Scanner(System.in);
       s.nextLine();
    }
@@ -444,7 +444,6 @@ public class Retail {
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
-   
    public static void manageMenu(){
       System.out.println("\n\nMAIN MENU");
       System.out.println("---------");
@@ -482,8 +481,6 @@ public class Retail {
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
-
-
    /*
     * Check log in credentials for an existing user
     * @return User login or null is the user does not exist
@@ -501,6 +498,7 @@ public class Retail {
          List<String> user = result.get(0);
 		   return user;
       }
+      System.out.println("Invalid Login...");
       return null;
       }catch(Exception e){
          System.err.println (e.getMessage ());
@@ -510,49 +508,108 @@ public class Retail {
 
 // Rest of the functions definition go in here
 
-   public static void viewStores(Retail esql) {
+   public static String getStoreID(Retail esql){//Helper function to get valid storeID for managers and Admins with no range limits
+      String storeID;
+      String query;
+      if(esql.userType.equals("admin")){
+            query = String.format("SELECT storeID, name, dateestablished FROM Store;");
+            System.out.println();
+            try{
+               esql.executeQueryAndPrintResult(query);
+            }
+            catch(Exception e){
+               System.err.println (e.getMessage ());
+               return null;
+            }
+            do{
+               try{
+                  System.out.print("\tEnter Store ID: ");
+                  storeID = in.readLine().trim();
+                  query = String.format("Select * FROM Store WHERE storeID= %s;",storeID,esql.userID);
+                  if(esql.executeQuery(query) == 0){
+                     System.out.format("Invalid Store Choice! Please select a valid store\n",esql.userID);
+                  }else{break;}
+               }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+               }
+            }while(true);
+         }else{
+            query = String.format("SELECT storeID, name, dateestablished FROM Store WHERE managerID = %s;", esql.userID);
+            System.out.println();
+            try{
+               esql.executeQueryAndPrintResult(query);
+            }
+            catch(Exception e){
+               System.err.println (e.getMessage ());
+               return null;
+            }
+            do{
+               try{
+                  System.out.print("\tEnter Store ID: ");
+                  storeID = in.readLine().trim();
+                  query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", storeID,esql.userID);
+                  if(esql.executeQuery(query)== 0)
+                     System.out.format("Invalid Store Choice! Please select a store where you manage\n", esql.userID);
+                  else{break;}
+               }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+               }
+            }while(true);
+         }
+      return storeID;
+   }
+   public static void viewStores(Retail esql) {//View Stores 30 miles or less from logged in Customer
       try{
          String query = String.format("SELECT S.storeID, S.name, calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude) AS distance FROM Store S, Users U WHERE U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", esql.userID);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
-         printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void viewProducts(Retail esql) {
+   public static void viewProducts(Retail esql) {//View Products available at any store
       try{
-         int store;
+         int store=0;
+         String query = String.format("SELECT storeID, name, dateestablished FROM Store;");
+         System.out.println();
+         esql.executeQueryAndPrintResult(query);
          do {
-         System.out.print("\tEnter Store ID: ");
-         try { // read the integer, parse it and break.
-            store = Integer.parseInt(in.readLine());
-            break;
-         }catch (Exception e) {
-            System.out.println("Your input is invalid!");
-            continue;
-         }//end try
-      }while (true);
-
-      String query = String.format("SELECT P.productName as Name, P.numberOfUnits as Qty, P.pricePerUnit as Unit_Price FROM Product P WHERE P.storeID = '%d';",store);
+            System.out.print("\tEnter Store ID: ");
+            try { // read the integer, parse it and break.
+               store = Integer.parseInt(in.readLine());
+               query = String.format("SELECT * FROM Store WHERE storeID = %d;", store);
+               if(esql.executeQuery(query)==0){
+                  System.out.println("The store does not exist");
+               }else{break;}
+            }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+            }//end try
+         }while (true);
+      query = String.format("SELECT P.productName as Name, P.numberOfUnits as Qty, P.pricePerUnit as Unit_Price FROM Product P WHERE P.storeID = '%d';",store);
+      System.out.println();
       esql.executeQueryAndPrintResult(query);
       printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void placeOrder(Retail esql) {
+   public static void placeOrder(Retail esql) {//Place an order from a store within range
       try{
-         int store;
+         int store=0;
          String productName;
          int units;
          String query;
          do { // StoreID input
+            viewStores(esql);
             System.out.print("\tEnter Store ID: ");
             try { // read the integer, parse it and break.
                store = Integer.parseInt(in.readLine());
                query = String.format("SELECT S.storeID FROM Store S, Users U WHERE S.storeID = '%d' AND U.userID = '%s' AND calculate_distance(U.latitude, U.longitude, S.latitude, S.longitude)<= 30;", store, esql.userID);
                if(esql.executeQuery(query)==0){
-                  System.out.println("\tThe store does not exist or is too far!");
+                  System.out.println("The store does not exist or is too far!");
                   continue;
                }
                break;
@@ -562,18 +619,27 @@ public class Retail {
             }//end try
          }while (true);
          do{ //Product name input
-            System.out.print("\tEnter Product Name: ");
-            productName = in.readLine();
+            query = String.format("SELECT ProductName, numberofunits as Qty_Available FROM Product WHERE storeID = %d;", store);
+            System.out.println();
+            esql.executeQueryAndPrintResult(query);
+            while(true){
+               System.out.print("\tEnter Product Name: ");
+               productName = in.readLine().trim();
+               query = String.format("SELECT * FROM Product WHERE storeID = %d AND productName = '%s';",store,productName);
+               if(esql.executeQuery(query)==0){
+                  System.out.println("Invalid Product...");
+               }else{break;}
+            }
             System.out.print("\tEnter Number of units: ");
             try { // read the integer, parse it and break.
                units = Integer.parseInt(in.readLine());
             }catch (Exception e) {
-               System.out.println("\tYour input is invalid!");
+               System.out.println("Your input is invalid!");
                continue;
             }//end try
             query = String.format("SELECT storeID FROM Product WHERE storeID = '%d' AND productName = '%s' AND numberOfUnits>=%d;", store, productName, units);
             if(esql.executeQuery(query)==0){
-               System.out.println("\tThe product does not exists or there is not enough stock!");
+               System.out.println("The product does not exists or there is not enough stock!");
                continue;
             }
             break;
@@ -582,45 +648,50 @@ public class Retail {
          //Insert into Orders table; the product table is updated using a trigger
          String q3 = String.format("INSERT INTO Orders (customerID, storeID, productName, unitsOrdered, orderTime) VALUES (%s, %d, '%s', %d, DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp))", esql.userID, store, productName, units);
          esql.executeUpdate(q3);
+         //Feedback to user
+         System.out.println("\nOrder Submitted...");
+         query = String.format("SELECT * FROM Orders WHERE customerID=%s ORDER BY orderNumber DESC LIMIT 1;",esql.userID);
+         esql.executeQueryAndPrintResult(query);
+         printWait();
       }
       catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void viewRecentOrders(Retail esql) {
+   public static void viewRecentOrders(Retail esql) {//View your recent orders
       try{
          String query = String.format("SELECT S.storeID, S.name, O.productName, O.unitsOrdered, O.orderTime FROM Store S, Orders O WHERE '%s' = O.customerID AND O.storeID = S.storeID ORDER BY O.orderTime desc LIMIT 5;", esql.userID);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
+         if(esql.executeQuery(query)==0){
+            System.out.println("\tYou have no orders to view");
+         }
          printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void updateProduct(Retail esql) {
+   public static void updateProduct(Retail esql) {//Managers and Admins can update Product Qty Issues
       try{
-         int valid = 0;
          String[] values = {null,null,null,null};
          List<String> validProduct=null;
-         String query = null;
-         query = String.format("SELECT * FROM Product P WHERE P.storeID IN (SELECT S.storeID FROM Store S WHERE S.managerID = %s) ORDER BY P.storeID;", esql.userID);
+         values[0] = getStoreID(esql);
+         String query = String.format("SELECT * FROM Product P WHERE P.storeID=%s ORDER BY P.storeID;", values[0]);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          do{
-            System.out.print("Enter Store ID: ");
-            values[0] = in.readLine().trim();
-            query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", values[0],esql.userID);
-            valid = esql.executeQuery(query);
-            if(valid == 0)
-               System.out.format("Invalid Store Choice! Please select a store where you manage\n", esql.userID);
-         }while(valid<=0);
-         valid = 0;
-         do{
-         System.out.print("Enter Product Name: ");
-         values[1] = in.readLine().trim();
-         query = String.format("Select * FROM Product WHERE productName = '%s' AND storeID = %s;", values[1], values[0]);
-         valid = esql.executeQuery(query);
-         if(valid==0)
-            System.out.format("Product '%s' does not exist at Store %s! Please select valid product\n", values[1], values[0]);
-         }while(valid<=0);
+            try{
+               System.out.print("\tEnter Product Name: ");
+               values[1] = in.readLine().trim();
+               query = String.format("Select * FROM Product WHERE productName = '%s' AND storeID = %s;", values[1], values[0]);
+               if(esql.executeQuery(query)== 0){
+                  System.out.format("Product '%s' does not exist at Store %s! Please select valid product\n", values[1], values[0]);
+               }else{break;}
+            }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+            }
+         }while(true);
 
          validProduct=esql.executeQueryAndReturnResult(query).get(0);
          System.out.format("Current Product : %s at Store %s\n",validProduct.get(1).trim(),validProduct.get(0).trim());
@@ -647,37 +718,11 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewRecentUpdates(Retail esql) {
+   public static void viewRecentUpdates(Retail esql) {//View Recent Product Updates at store you manage
       try{
-         String store;
-         String query;
-         int valid=0;
-         if(esql.userType.equals("admin")){
-            query = String.format("SELECT storeID, name FROM Store;");
-            System.out.println("Stores:");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               store = in.readLine().trim();
-               query = String.format("Select * FROM Store WHERE storeID= %s;",store,esql.userID);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a valid store\n",esql.userID);
-            }while(valid<=0);
-         }else{
-            query = String.format("SELECT storeID, name FROM Store WHERE managerID = %s;", esql.userID);
-            System.out.println("Stores You Manage:");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               store = in.readLine().trim();
-               query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;",store,esql.userID);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a store you manage\n",esql.userID);
-            }while(valid<=0);
-         }
-         query = String.format("SELECT * FROM ProductUpdates WHERE storeID = %s ORDER BY updateNumber DESC LIMIT 5;",store);
+         String store = getStoreID(esql);
+         String query = String.format("SELECT * FROM ProductUpdates WHERE storeID = %s ORDER BY updateNumber DESC LIMIT 5;",store);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
@@ -687,36 +732,9 @@ public class Retail {
    }
    public static void viewPopularProducts(Retail esql) {//View the most popular products in a store
       try{
-         int valid = 0;
-         String store;
-         String query;
-         String q1;
-         if(esql.userType.equals("admin")){
-            query = String.format("SELECT storeID, name FROM Store;");
-            System.out.println("Stores:");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               store = in.readLine().trim();
-               q1 = String.format("Select * FROM Store WHERE storeID= %s;", store);
-               valid = esql.executeQuery(q1);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a valid store \n");
-            }while(valid<=0);
-         }else{
-            query = String.format("SELECT storeID, name FROM Store WHERE managerID = %s;", esql.userID);
-            System.out.println("Stores You Manage:");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               store = in.readLine().trim();
-               q1 = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,esql.userID);
-               valid = esql.executeQuery(q1);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", esql.userID);
-            }while(valid<=0);
-         }
-         query = String.format("SELECT O.productName, COUNT(*) as NumOfOrders FROM Orders O WHERE O.storeID ='%s' GROUP BY O.productName ORDER BY COUNT(*) DESC LIMIT 5;", store);
+         String store = getStoreID(esql);
+         String query = String.format("SELECT O.productName, COUNT(*) as NumOfOrders FROM Orders O WHERE O.storeID ='%s' GROUP BY O.productName ORDER BY COUNT(*) DESC LIMIT 5;", store);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
@@ -726,103 +744,63 @@ public class Retail {
    public static void viewPopularCustomers(Retail esql) {//View the most popular customers across all the manager's stores
       try{
          int valid = 0;
-         String store;
-         String query;
-         String q1;
-         if(esql.userType.equals("admin")){
-            query = String.format("SELECT storeID, name FROM Store;");
-            System.out.println("Stores:");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               store = in.readLine().trim();
-               q1 = String.format("Select * FROM Store WHERE storeID= %s;", store);
-               valid = esql.executeQuery(q1);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a valid store\n");
-            }while(valid<=0);
-         }else{
-            query = String.format("SELECT storeID, name FROM Store WHERE managerID = %s;", esql.userID);
-            System.out.println("Stores You Manage:");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               store = in.readLine().trim();
-               q1 = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,esql.userID);
-               valid = esql.executeQuery(q1);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", esql.userID);
-            }while(valid<=0);
-         }
-         query = String.format("SELECT O.customerID, U.name, COUNT(*) as NumOfOrders FROM Orders O, Users U WHERE O.storeID='%s' AND O.customerID=U.userID GROUP BY O.customerID, U.name ORDER BY COUNT(*) DESC LIMIT 5;", store);
+         String store = getStoreID(esql);
+         String query = String.format("SELECT O.customerID, U.name, COUNT(*) as NumOfOrders FROM Orders O, Users U WHERE O.storeID='%s' AND O.customerID=U.userID GROUP BY O.customerID, U.name ORDER BY COUNT(*) DESC LIMIT 5;", store);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void placeProductSupplyRequests(Retail esql) {
+   public static void placeProductSupplyRequests(Retail esql) {//Place Supply Requests for a store you manage
       try{
-         int valid = 0;
          int qty = 0;
          String query;
          String[] values = {null,null,null};
          query = String.format("SELECT * FROM Warehouse ORDER BY warehouseID;");
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          do{
-            System.out.print("Enter Warehouse ID: ");
-            values[0] = in.readLine().trim();
-            query = String.format("SELECT * FROM Warehouse WHERE warehouseID= %s;",values[0]);
-            valid = esql.executeQuery(query);
-            if(valid == 0)
-               System.out.format("Invalid Choice! Please select a warehouse\n",esql.userID);
-         }while(valid<=0);
-         valid=0;
-         if(esql.userType.equals("admin")){
-            query = String.format("SELECT storeID, name, dateestablished FROM Store;");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               values[1] = in.readLine().trim();
-               query = String.format("SELECT * FROM Store WHERE storeID= %s;",values[1]);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a valid store\n");
-            }while(valid<=0);
-         }else{
-            query = String.format("SELECT storeID, name, dateestablished FROM Store WHERE managerID=%s;", esql.userID);
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.print("Enter Store ID: ");
-               values[1] = in.readLine().trim();
-               query = String.format("SELECT * FROM Store WHERE storeID= %s AND managerID = %s;",values[1],esql.userID);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a store you manage\n",esql.userID);
-            }while(valid<=0);
-         }
-         valid=0;
+            try{
+               System.out.print("\tEnter Warehouse ID: ");
+               values[0] = in.readLine().trim();
+               query = String.format("SELECT * FROM Warehouse WHERE warehouseID= %s;",values[0]);
+               if(esql.executeQuery(query) == 0){
+                  System.out.format("Invalid Choice! Please select a warehouse\n",esql.userID);
+                  }else{break;}
+            }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+               }
+         }while(true);
+         values[1] = getStoreID(esql);
          query = String.format("SELECT productName, numberOfUnits FROM Product WHERE storeID=%s ORDER BY productName;", values[1]);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          do{
-            System.out.print("Enter Product Name: ");
-            values[2] = in.readLine().trim();
-            query = String.format("Select * FROM Product WHERE storeID= %s AND productName = '%s';",values[1],values[2]);
-            valid = esql.executeQuery(query);
-            if(valid == 0)
-               System.out.format("Invalid Choice! Please select a valid product\n",esql.userID);}while(valid<=0);
-         valid=0;
+            try{
+               System.out.print("\tEnter Product Name: ");
+               values[2] = in.readLine().trim();
+               query = String.format("Select * FROM Product WHERE storeID= %s AND productName = '%s';",values[1],values[2]);
+               if(esql.executeQuery(query) == 0){
+                  System.out.format("Invalid Choice! Please select a valid product\n",esql.userID);
+               }else{break;}
+            }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+            }            
+         }while(true);
          do{ 
-            System.out.print("Enter Quantity: ");
+            System.out.print("\tEnter Quantity: ");
             try { 
                qty = Integer.parseInt(in.readLine());
-               valid=1;
                break;
             }catch (Exception e) {
-               System.out.println("Enter a valid amount!");
+               System.out.println("Your input is invalid!");
                continue;
             }
-         }while(valid<=0);
+         }while(true);
          int curQty = Integer.parseInt(esql.executeQueryAndReturnResult(String.format("SELECT numberOfUnits FROM Product WHERE storeID =%s AND productName = '%s'", values[1],values[2])).get(0).get(0));
          System.out.println("Update Product");
          query = String.format("UPDATE Product SET numberOfUnits = %s WHERE storeID = %s AND productName = '%s';", (qty+curQty),values[1],values[2]);
@@ -830,6 +808,7 @@ public class Retail {
          System.out.println("Insert Product Request");
          query = String.format("INSERT INTO ProductSupplyRequests(managerID,warehouseID,storeID,productName,unitsRequested) VALUES (%s, %s, %s, '%s', %d); ",esql.userID, values[0],values[1],values[2],qty);
          esql.executeUpdate(query);
+         System.out.println();
          System.out.println("Order Submitted...");
          query = String.format("SELECT * FROM ProductSupplyRequests ORDER BY requestNumber DESC LIMIT 1;");
          esql.executeQueryAndPrintResult(query);
@@ -838,97 +817,78 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewStoreOrders(Retail esql){
+   public static void viewStoreOrders(Retail esql){//View orders at a store you manage
       try{
-         String query;
-         String store;
-         int valid=0;
-         if(esql.userType.equals("admin")){
-            query = String.format("Select storeID, name, dateestablished FROM Store;");
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.println("Select Store to View:");
-               store = in.readLine().trim();
-               query = String.format("Select * FROM Store WHERE storeID= %s;", store);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a valid store\n");
-            }while(valid <=0);
-         }else{
-            query = String.format("Select storeID, name, dateestablished FROM Store WHERE managerID = %s;",esql.userID);
-            esql.executeQueryAndPrintResult(query);
-            do{
-               System.out.println("Select Store to View:");
-               store = in.readLine().trim();
-               query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", store,esql.userID);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a store where User %s is Manager\n", esql.userID);
-            }while(valid <=0);
-         }
-         query = String.format("SELECT * FROM Orders WHERE storeID = %s ORDER BY ordertime DESC;", store);
+         String store=getStoreID(esql);
+         String query = String.format("SELECT * FROM Orders WHERE storeID = %s ORDER BY ordertime DESC;", store);
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
+         if(esql.executeQuery(query)==0){
+            System.out.println("\tThis store has no orders to view");
+         }
          printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void adminViewUsers(Retail esql) {
+   public static void adminViewUsers(Retail esql) {//Admins can view all registered users
        try{
          String query = String.format("SELECT * FROM Users ORDER BY type,name;");
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void adminViewProducts(Retail esql) {
+   public static void adminViewProducts(Retail esql) {//Admins can view all products at all stores
       try{
          String query = String.format("SELECT * FROM Product ORDER BY storeID,productName;");
+         System.out.println();
          esql.executeQueryAndPrintResult(query);
          printWait();
       }catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
-   public static void adminUpdateUser(Retail esql) {
+   public static void adminUpdateUser(Retail esql) {//Admins can make changes to user information
       try{
          int user = 0;
          String[] values = {null,null,null,null,null};
          List<List<String>> result = null;
          List<String> validUser=null;
-         System.out.print("Enter User ID to update: ");
+         System.out.print("\tEnter User ID: ");
          user = Integer.parseInt(in.readLine());
          String query = String.format("Select * FROM Users WHERE userID = '%d';", user);
          result = esql.executeQueryAndReturnResult(query);
          validUser = result.get(0);
-         System.out.format("User ID : %s\n",validUser.get(0));
-         System.out.format("Current Name: %s\nNew User Name (Press Enter to keep current): ", validUser.get(1));
+         System.out.format("\tUser ID : %s\n",validUser.get(0));
+         System.out.format("\tCurrent Name: %s\n\tNew User Name (Press Enter to keep current): ", validUser.get(1));
          values[0] = in.readLine();
          if(values[0].equals("")){
             values[0] = validUser.get(1);
          }
-         System.out.format("Current Password: %s\nNew Password (Press Enter to keep current): ", validUser.get(2));
+         System.out.format("\tCurrent Password: %s\n\tNew Password (Press Enter to keep current): ", validUser.get(2));
          values[1] = in.readLine();
          if(values[1].equals("")){
             values[1] = validUser.get(2);
          }
-         System.out.format("Current Latitude: %s\nNew Latitude (Press Enter to keep current): ", validUser.get(3));
+         System.out.format("\tCurrent Latitude: %s\n\tNew Latitude (Press Enter to keep current): ", validUser.get(3));
          values[2] = in.readLine();
          if(values[2].equals("")){
             values[2] = validUser.get(3);
          }
-         System.out.format("Current Longitude: %s\nNew Longitude (Press Enter to keep current): ", validUser.get(4));
+         System.out.format("\tCurrent Longitude: %s\n\tNew Longitude (Press Enter to keep current): ", validUser.get(4));
          values[3] = in.readLine();
          if(values[3].equals("")){
             values[3] = validUser.get(4);
          }
          System.out.format("Current Account Type: %s\n", validUser.get(5));
          System.out.println("Select New Type:");
-         System.out.println("1:Keep Current Value");
-         System.out.println("2:Set as CUSTOMER");
-         System.out.println("3:Set as MANAGER");
-         System.out.println("4:Set as ADMIN");
+         System.out.println("\t1:Keep Current Value");
+         System.out.println("\t2:Set as CUSTOMER");
+         System.out.println("\t3:Set as MANAGER");
+         System.out.println("\t4:Set as ADMIN");
          while(values[4]==null){
             switch(readChoice()){
                case 1:values[4]=validUser.get(5).trim();break;
@@ -942,6 +902,7 @@ public class Retail {
          esql.executeQueryAndPrintResult(query);
          String update = String.format("UPDATE Users SET name = '%s', password = %s , latitude = %s , longitude = %s , type = '%s' WHERE userID = %d;", values[0],values[1],values[2],values[3],values[4],user);
          esql.executeUpdate(update);
+         System.out.println();
          System.out.println("\nUpdated User Info:");
          esql.executeQueryAndPrintResult(query);
          printWait();
@@ -949,57 +910,7 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
-   public static void adminUpdateProduct(Retail esql) {
-      try{
-         int valid = 0;
-         String[] values = {null,null,null,null};
-         List<String> validProduct=null;
-         String query = null;
-         do{
-         System.out.print("Enter Product Name: ");
-         values[1] = in.readLine().trim();
-         query = String.format("Select * FROM Product WHERE productName = '%s';", values[1]);
-         valid = esql.executeQuery(query);
-         if(valid==0)
-            System.out.format("Product '%s' does not exist! Please select valid product", values[1]);
-         }while(valid<=0);
-         valid = 0;
-         do{
-         System.out.print("Enter Store ID: ");
-         values[0] = in.readLine();
-         query = String.format("Select * FROM Product WHERE storeID = %s AND productName = '%s' ;", values[0],values[1]);
-         valid = esql.executeQuery(query);
-         if(valid==0)
-            System.out.format("Either Store '%s' does not exist or does not stock Product '%s'! Please select different store", values[0],values[1]);
-         }while(valid<=0);
 
-         validProduct=esql.executeQueryAndReturnResult(query).get(0);
-
-         System.out.format("Current Product : %s at Store %s\n",validProduct.get(1).trim(),validProduct.get(0).trim());
-         System.out.format("Current Quantity: %s\nNew Quantity (Press Enter to keep current): ", validProduct.get(2));
-         values[2] = in.readLine();
-         if(values[2].equals("")){
-            values[2] = validProduct.get(2);
-         }
-         System.out.format("Current Unit Price: %s\nNew Unit Price (Press Enter to keep current): ", validProduct.get(3));
-         values[3] = in.readLine();
-         if(values[3].equals("")){
-            values[3] = validProduct.get(3);
-         }
-         
-         System.out.println("\nOriginal Product Info:");
-         esql.executeQueryAndPrintResult(query);
-         String update = String.format("UPDATE Product SET numberOfUnits = %s , pricePerUnit = %s WHERE storeID = %s AND productName = '%s';", values[2],values[3],values[0],values[1]);
-         esql.executeUpdate(update);
-         System.out.println("\nUpdated Product Info:");
-         esql.executeQueryAndPrintResult(query);
-         query = String.format("INSERT INTO ProductUpdates (managerID,storeID,productName,updatedOn) VALUES ( %s, %s, '%s', DATE_TRUNC('second', CURRENT_TIMESTAMP::timestamp));", esql.userID, values[0], values[1]);
-         esql.executeUpdate(query);
-         printWait();
-      }catch(Exception e){
-         System.err.println(e.getMessage());
-      }
-   }
    
 }//end Retail
 
