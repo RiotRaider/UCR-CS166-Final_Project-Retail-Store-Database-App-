@@ -304,6 +304,7 @@ public class Retail {
                      case 11: viewPopularCustomers(esql); break;
                      case 12: placeProductSupplyRequests(esql); break;
                      case 13: viewStoreOrders(esql);break;
+                     case 14: viewSupplyRequests(esql);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -320,6 +321,7 @@ public class Retail {
                      case 8: viewPopularCustomers(esql); break;
                      case 9: placeProductSupplyRequests(esql); break;
                      case 10: viewStoreOrders(esql);break;
+                     case 11: viewSupplyRequests(esql);break;
                      case 20: usermenu = false; break;
                      default : System.out.println("Unrecognized choice!"); break;
                     }
@@ -458,6 +460,7 @@ public class Retail {
       System.out.println("8. View 5 Popular Customers");
       System.out.println("9. Place Product Supply Request to Warehouse");
       System.out.println("10.View Orders at Store");
+      System.out.println("11.View 5 Recent Supply Requests for Store");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -478,6 +481,7 @@ public class Retail {
       System.out.println("11. View 5 Popular Customers");
       System.out.println("12. Place Product Supply Request to Warehouse");
       System.out.println("13.View Orders at Store");
+      System.out.println("14.View 5 Recent Supply Requests for Store");
       System.out.println(".........................");
       System.out.println("20. Log out");
    }
@@ -910,7 +914,21 @@ public class Retail {
          System.err.println(e.getMessage());
       }
    }
+   public static void viewSupplyRequests(Retail esql){//Admins and Managers can view recent Supply Requests for a store
+      try{
+         String store=getStoreID(esql);
+         String query = String.format("SELECT * FROM ProductSupplyRequests WHERE storeID = %s ORDER BY requestNumber DESC LIMIT 5;", store);
+         System.out.println();
+         esql.executeQueryAndPrintResult(query);
 
+         if(esql.executeQuery(query)==0){
+            System.out.println("\tThis store has no Product Supply Requests to view");
+         }
+         printWait();
+      }catch(Exception e){
+         System.err.println(e.getMessage());
+      }   
+   }
    
 }//end Retail
 
