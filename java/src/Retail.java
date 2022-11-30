@@ -501,6 +501,7 @@ public class Retail {
          List<String> user = result.get(0);
 		   return user;
       }
+      System.out.println("Invalid Login...");
       return null;
       }catch(Exception e){
          System.err.println (e.getMessage ());
