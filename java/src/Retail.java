@@ -825,7 +825,6 @@ public class Retail {
    }
    public static void placeProductSupplyRequests(Retail esql) {//Place Supply Requests for a store you manage
       try{
-         int valid = 0;
          int qty = 0;
          String query;
          String[] values = {null,null,null};
@@ -833,62 +832,79 @@ public class Retail {
          System.out.println();
          esql.executeQueryAndPrintResult(query);
          do{
-            System.out.print("\tEnter Warehouse ID: ");
-            values[0] = in.readLine().trim();
-            query = String.format("SELECT * FROM Warehouse WHERE warehouseID= %s;",values[0]);
-            valid = esql.executeQuery(query);
-            if(valid == 0)
-               System.out.format("Invalid Choice! Please select a warehouse\n",esql.userID);
-         }while(valid<=0);
-         valid=0;
+            try{
+               System.out.print("\tEnter Warehouse ID: ");
+               values[0] = in.readLine().trim();
+               query = String.format("SELECT * FROM Warehouse WHERE warehouseID= %s;",values[0]);
+               if(esql.executeQuery(query) == 0){
+                  System.out.format("Invalid Choice! Please select a warehouse\n",esql.userID);
+                  }else{break;}
+            }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+               }
+         }while(true);
          if(esql.userType.equals("admin")){
             query = String.format("SELECT storeID, name, dateestablished FROM Store;");
             System.out.println();
             esql.executeQueryAndPrintResult(query);
             do{
-               System.out.print("\tEnter Store ID: ");
-               values[1] = in.readLine().trim();
-               query = String.format("SELECT * FROM Store WHERE storeID= %s;",values[1]);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a valid store\n");
-            }while(valid<=0);
+               try{
+                  System.out.print("\tEnter Store ID: ");
+                  values[1] = in.readLine().trim();
+                  query = String.format("Select * FROM Store WHERE storeID= %s;",values[1],esql.userID);
+                  if(esql.executeQuery(query) == 0){
+                     System.out.format("Invalid Store Choice! Please select a valid store\n",esql.userID);
+                  }else{break;}
+               }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+               }
+            }while(true);
          }else{
-            query = String.format("SELECT storeID, name, dateestablished FROM Store WHERE managerID=%s;", esql.userID);
+            query = String.format("SELECT storeID, name, dateestablished FROM Store WHERE managerID = %s;", esql.userID);
             System.out.println();
             esql.executeQueryAndPrintResult(query);
             do{
-               System.out.print("\tEnter Store ID: ");
-               values[1] = in.readLine().trim();
-               query = String.format("SELECT * FROM Store WHERE storeID= %s AND managerID = %s;",values[1],esql.userID);
-               valid = esql.executeQuery(query);
-               if(valid == 0)
-                  System.out.format("Invalid Store Choice! Please select a store you manage\n",esql.userID);
-            }while(valid<=0);
-         }
-         valid=0;
+               try{
+                  System.out.print("\tEnter Store ID: ");
+                  values[1] = in.readLine().trim();
+                  query = String.format("Select * FROM Store WHERE storeID= %s AND managerID = %s;", values[1],esql.userID);
+                  if(esql.executeQuery(query)== 0)
+                     System.out.format("Invalid Store Choice! Please select a store where you manage\n", esql.userID);
+                  else{break;}
+               }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+               }
+            }while(true);
+            }
          query = String.format("SELECT productName, numberOfUnits FROM Product WHERE storeID=%s ORDER BY productName;", values[1]);
          System.out.println();
          esql.executeQueryAndPrintResult(query);
          do{
-            System.out.print("\tEnter Product Name: ");
-            values[2] = in.readLine().trim();
-            query = String.format("Select * FROM Product WHERE storeID= %s AND productName = '%s';",values[1],values[2]);
-            valid = esql.executeQuery(query);
-            if(valid == 0)
-               System.out.format("Invalid Choice! Please select a valid product\n",esql.userID);}while(valid<=0);
-         valid=0;
+            try{
+               System.out.print("\tEnter Product Name: ");
+               values[2] = in.readLine().trim();
+               query = String.format("Select * FROM Product WHERE storeID= %s AND productName = '%s';",values[1],values[2]);
+               if(esql.executeQuery(query) == 0){
+                  System.out.format("Invalid Choice! Please select a valid product\n",esql.userID);
+               }else{break;}
+            }catch (Exception e) {
+                  System.out.println("Your input is invalid!");
+                  continue;
+            }            
+         }while(true);
          do{ 
             System.out.print("\tEnter Quantity: ");
             try { 
                qty = Integer.parseInt(in.readLine());
-               valid=1;
                break;
             }catch (Exception e) {
-               System.out.println("Enter a valid amount!");
+               System.out.println("Your input is invalid!");
                continue;
             }
-         }while(valid<=0);
+         }while(true);
          int curQty = Integer.parseInt(esql.executeQueryAndReturnResult(String.format("SELECT numberOfUnits FROM Product WHERE storeID =%s AND productName = '%s'", values[1],values[2])).get(0).get(0));
          System.out.println("Update Product");
          query = String.format("UPDATE Product SET numberOfUnits = %s WHERE storeID = %s AND productName = '%s';", (qty+curQty),values[1],values[2]);
